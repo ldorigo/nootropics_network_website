@@ -24,7 +24,6 @@ dash-table==4.11.0
 decorator==4.4.2
 defusedxml==0.6.0
 dpath==2.0.1
-en-core-web-sm==2.3.1
 entrypoints==0.3
 fa2==0.3.5
 Flask==1.1.2
