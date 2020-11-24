@@ -1,6 +1,0 @@
-[submodule "wojciech"]
-	path = wojciech
-	url = https://github.com/wojciechdk/python_package
-[submodule "project"]
-	path = project
-	url = https://github.com/wojciechdk/Social_Graphs_and_Interactions_Final_Project
