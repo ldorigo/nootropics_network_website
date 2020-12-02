@@ -1,3 +1,4 @@
+from collections import Set
 import json
 from typing import Dict, List
 import random
@@ -10,6 +11,10 @@ try:
     from config import Config
 except ModuleNotFoundError:
     from project.config import Config
+
+# pre-fetch/compute some stuff to make computations faster
+
+wiki_data = lf.load_data_wiki()
 
 
 def get_page_from_name(name: str) -> Dict:
@@ -44,7 +49,7 @@ def get_random_page() -> Dict:
     return get_page_from_name(name)
 
 
-def get_wiki_page_names(with_synonyms: bool = False) -> List[str]:
+def get_wiki_page_names(with_synonyms: bool = False) -> Set[str]:
     """Get a list with the names of all the substance pages on wikipedia
 
     Args:
@@ -53,20 +58,10 @@ def get_wiki_page_names(with_synonyms: bool = False) -> List[str]:
         List[str]: List containing all substance names on wikipedia , eventually with synonyms
     """
 
-    names = wiki_data["name"]
+    names = set(wiki_data["name"])
     if with_synonyms:
-        names += list(synonyms_to_names.keys())
-        names = list(set(names))
+        names = names.union(synonyms_to_names.keys())
     return names
-
-
-def get_page_lengths() -> List[int]:
-    """Get a list of all the page lengths, in characters
-
-    Returns:
-        List[int]: List of the number of characters in each wiki page
-    """
-    return [len(p) for p in wiki_data["content"]]
 
 
 def get_wiki_synonyms_mapping() -> Dict[str, str]:
@@ -79,5 +74,29 @@ def get_wiki_synonyms_mapping() -> Dict[str, str]:
         return json.load(f)
 
 
-wiki_data = lf.load_data_wiki()
 synonyms_to_names = get_wiki_synonyms_mapping()
+all_names_and_synonyms = get_wiki_page_names(with_synonyms=True)
+
+
+def get_page_lengths() -> List[int]:
+    """Get a list of all the page lengths, in characters
+
+    Returns:
+        List[int]: List of the number of characters in each wiki page
+    """
+    return [len(p) for p in wiki_data["content"]]
+
+
+def get_number_of_links() -> List[int]:
+    """Get a list of the number of links of each page (only counting links to other substances)
+
+    Returns:
+        List[int]: List of the number of links that each page has towards other pages
+    """
+    valid_links_numbers = []
+    for links in wiki_data["links"]:
+        valid_links_numbers.append(
+            len([link for link in links if link.lower() in all_names_and_synonyms])
+        )
+
+    return valid_links_numbers
