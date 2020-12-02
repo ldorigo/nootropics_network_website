@@ -1,6 +1,10 @@
 import json
 from typing import Dict
-from config import Config
+
+try:
+    from config import Config
+except ModuleNotFoundError:
+    from project.config import Config
 
 
 def save_synonym_mapping(wiki_data: Dict):
@@ -44,7 +48,7 @@ def save_contents(wiki_data: Dict):
         json.dump(dict(zip(wiki_data["name"], wiki_data["content"])), f)
 
 
-def save_urls(wiki_data:Dict):
+def save_urls(wiki_data: Dict):
     """Save mapping from substance name to wikipedia urls
 
     Args:
@@ -58,7 +62,7 @@ def save_wiki_data_files(wiki_data: Dict):
     """Save all secondary files to facilitate access to wiki data: names, synonym mapping, urls and content mapping.
 
     Args:
-        wiki_data (Dict): flat dict with all wikipedia data 
+        wiki_data (Dict): flat dict with all wikipedia data
     """
 
     save_synonym_mapping(wiki_data=wiki_data)

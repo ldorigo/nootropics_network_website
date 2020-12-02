@@ -1,12 +1,15 @@
 import json
 
-from config import Config
+try:
+    from config import Config
+except ModuleNotFoundError:
+    from project.config import Config
+
 from textblob import TextBlob
 from tqdm import tqdm
 
 
-def calculate_sentiment_reddit(alternative_path=None,
-                               alternative_path_out=None):
+def calculate_sentiment_reddit(alternative_path=None, alternative_path_out=None):
     filepath_in = (
         alternative_path if alternative_path else Config.Path.reddit_data_with_NER
     )
@@ -20,9 +23,9 @@ def calculate_sentiment_reddit(alternative_path=None,
 
     for post_id, post in tqdm(drug_database_reddit.items()):
         try:
-            analysis = TextBlob(post["content"] + post['title'])
+            analysis = TextBlob(post["content"] + post["title"])
         except KeyError:
-            analysis = TextBlob(post["body"] + post['title'])  # for comments
+            analysis = TextBlob(post["body"] + post["title"])  # for comments
         post["polarity"] = analysis.polarity
         post["subjectivity"] = analysis.subjectivity
 

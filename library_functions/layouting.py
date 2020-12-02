@@ -1,9 +1,11 @@
 # %% Functions to place nodes on a 2d space
-
-
-from fa2 import ForceAtlas2
 import networkx as nx
-import library_functions as lf
+from fa2 import ForceAtlas2
+
+try:
+    import library_functions as lf
+except ModuleNotFoundError:
+    import project.library_functions as lf
 
 # %%
 

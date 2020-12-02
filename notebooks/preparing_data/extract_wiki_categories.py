@@ -1,6 +1,10 @@
 # %%
 from typing import List, Set
-from config import Config
+
+try:
+    from config import Config
+except ModuleNotFoundError:
+    from project.config import Config
 import json
 from library_functions import load_data_wiki
 import sys

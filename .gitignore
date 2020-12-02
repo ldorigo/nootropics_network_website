@@ -4,6 +4,7 @@ wojciech
 private_data
 
 __pycache__
+/shared_data/reddit_data_with_NER_extended.json
 shared_data/reddit_with_textdata
 .gpickle
 

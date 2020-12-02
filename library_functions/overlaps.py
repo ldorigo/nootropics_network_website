@@ -1,7 +1,7 @@
 from os import name
-from typing import Collection, Dict
-import networkx as nx
 from typing import Collection, Dict, List
+
+import networkx as nx
 
 
 def inverse_communities_from_partition(

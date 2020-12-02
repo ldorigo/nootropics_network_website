@@ -1,7 +1,12 @@
 from typing import List
 
 from tqdm.auto import tqdm
-import library_functions as lf
+
+try:
+    import library_functions as lf
+except ModuleNotFoundError:
+    import project.library_functions as lf
+
 import networkx as nx
 import numpy as np
 import wojciech as w
@@ -62,7 +67,8 @@ def create_graph_reddit(
         def occurring_to_seldom(edge_attributes):
             return edge_attributes["count"] < min_edge_occurrences_to_link
 
-        edges_to_remove = w.graph.get_edges_by_conditions(g_reddit, occurring_to_seldom)
+        edges_to_remove = w.graph.get_edges_by_conditions(g_reddit,
+                                                          occurring_to_seldom)
 
         g_reddit.remove_edges_from(edges_to_remove)
 

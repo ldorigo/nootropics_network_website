@@ -2,9 +2,17 @@
 from fa2 import ForceAtlas2
 from networkx.readwrite.adjlist import read_adjlist
 import networkx as nx
-from config import Config
+
+try:
+    from config import Config
+except ModuleNotFoundError:
+    from project.config import Config
 import wojciech as w
-import library_functions as lf
+
+try:
+    import library_functions as lf
+except ModuleNotFoundError:
+    import project.library_functions as lf
 import importlib
 
 #%%
