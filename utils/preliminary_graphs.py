@@ -59,5 +59,6 @@ def get_wiki_plots_figure():
         yaxis={},
         showlegend=False,
         clickmode="event+select",
+        height=650,
     )
     return pages_distribution
