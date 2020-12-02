@@ -37,4 +37,4 @@ from .text_analysis import (
 )
 
 
-from .get_from_wiki import get_page_from_name, get_random_page
+from .get_from_wiki import get_page_from_name, get_random_page, get_wiki_page_names

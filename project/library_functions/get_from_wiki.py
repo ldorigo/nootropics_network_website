@@ -40,3 +40,19 @@ def get_random_page() -> Dict:
     """
     name = random.choice(wiki_data["names"])
     return get_page_from_name(name)
+
+
+def get_wiki_page_names(with_synonyms: bool = False) -> List[str]:
+    """Get a list with the names of all the substance pages on wikipedia
+
+    Args:
+        with_synonyms (bool): include synonyms in the list
+    Returns:
+        List[str]: List containing all substance names on wikipedia , eventually with synonyms
+    """
+
+    names = wiki_data["name"]
+    if with_synonyms:
+        names += list(synonyms_to_names.keys())
+        names = list(set(names))
+    return names
