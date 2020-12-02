@@ -25,8 +25,7 @@ from pathlib import Path
 g_wiki = lf.create_graph_wiki()
 g_reddit = lf.create_graph_reddit()
 g_reddit_post_length_limit = lf.create_graph_reddit(
-    max_drugs_in_post=10,
-    min_content_length_in_characters=25
+    max_drugs_in_post=10, min_content_length_in_characters=25
 )
 
 g_reddit_max_10 = lf.create_graph_reddit(max_drugs_in_post=10)

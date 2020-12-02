@@ -15,11 +15,16 @@ def create_graph_wiki():
     g_wiki = nx.DiGraph()
     g_wiki.add_nodes_from(substance_names, categories=[])
 
+    for index_drug, drug in enumerate(wiki_data["name"]):
+        if drug in g_wiki.nodes:
+            g_wiki.nodes[drug]["categories"] = wiki_data["categories"][index_drug]
+            g_wiki.nodes[drug]["content"] = wiki_data["content"]
+            g_wiki.nodes[drug]["url"] = wiki_data["url"]
+
     # Add node properties.
     for index_drug, drug in enumerate(wiki_data["name"]):
         if drug in g_wiki.nodes:
-            g_wiki.nodes[drug]["categories"] =\
-                wiki_data["categories"][index_drug]
+            g_wiki.nodes[drug]["categories"] = wiki_data["categories"][index_drug]
             g_wiki.nodes[drug]["content"] = wiki_data["content"]
             g_wiki.nodes[drug]["url"] = wiki_data["url"]
 
