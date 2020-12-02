@@ -4,4 +4,8 @@ wojciech
 private_data
 
 __pycache__
-shared_data/reddit_with_textdata.gpickle
+shared_data/reddit_with_textdata
+.gpickle
+
+venv
+.idea
