@@ -99,3 +99,23 @@ def get_number_of_links() -> List[int]:
         )
 
     return valid_links_numbers
+
+
+def get_number_of_categories() -> List[int]:
+    """Get a list of the number of categories that each page is part of
+
+    Returns:
+        List[int]: List of the number of categories that each page belongs to
+    """
+
+    return [len(cats) for cats in wiki_data["categories"]]
+
+
+def get_number_of_synonyms() -> List[int]:
+    """Get a list of the number of synonyms (redirects) of each page
+
+    Returns:
+        List[int]: List of the number of redirects that each page has
+    """
+
+    return [len(syns) for syns in wiki_data["synonyms"]]

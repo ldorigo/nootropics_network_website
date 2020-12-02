@@ -44,4 +44,6 @@ from .get_from_wiki import (
     get_wiki_page_names,
     get_wiki_synonyms_mapping,
     get_number_of_links,
+    get_number_of_categories,
+    get_number_of_synonyms,
 )
