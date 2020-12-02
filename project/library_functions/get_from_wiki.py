@@ -66,7 +66,7 @@ def get_page_lengths() -> List[int]:
     Returns:
         List[int]: List of the number of characters in each wiki page
     """
-    return [len(p) for p in wiki_data["contents"]]
+    return [len(p) for p in wiki_data["content"]]
 
 
 def get_wiki_synonyms_mapping() -> Dict[str, str]:
