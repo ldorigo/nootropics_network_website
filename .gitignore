@@ -1,0 +1,7 @@
+full_wiki_data
+wojciech
+.vscode
+private_data
+
+__pycache__
+shared_data/reddit_with_textdata.gpickle
