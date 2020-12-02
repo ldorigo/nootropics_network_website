@@ -43,8 +43,3 @@ def load_data_wiki():
     lf.save_synonym_mapping(wiki_data)
 
     return wiki_data
-
-
-def load_synonym_mapping() -> Dict[str, str]:
-    with open(Config.Path.synonym_mapping, "r") as f:
-        return json.load(f)

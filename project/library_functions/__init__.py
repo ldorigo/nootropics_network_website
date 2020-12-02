@@ -3,7 +3,7 @@ from .calculate_sentiment_reddit import calculate_sentiment_reddit
 from .create_graph_reddit import create_graph_reddit
 from .create_graph_wiki import create_graph_wiki
 from .load_data_reddit import load_data_reddit
-from .load_data_wiki import load_data_wiki, load_synonym_mapping
+from .load_data_wiki import load_data_wiki
 from .load_substance_names import load_substance_names
 from .plot_comparison_of_attribute_distributions import (
     plot_comparison_of_attribute_distributions,
@@ -37,4 +37,10 @@ from .text_analysis import (
 )
 
 
-from .get_from_wiki import get_page_from_name, get_random_page, get_wiki_page_names
+from .get_from_wiki import (
+    get_page_from_name,
+    get_random_page,
+    get_page_lengths,
+    get_wiki_page_names,
+    get_wiki_synonyms_mapping,
+)

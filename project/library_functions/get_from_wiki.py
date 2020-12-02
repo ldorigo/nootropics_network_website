@@ -1,13 +1,15 @@
-from typing import Dict
+import json
+from typing import Dict, List
 import random
 
 try:
     import library_functions as lf
 except ModuleNotFoundError:
     import project.library_functions as lf
-
-wiki_data = lf.load_data_wiki()
-synonyms_to_names = lf.load_synonym_mappings()
+try:
+    from config import Config
+except ModuleNotFoundError:
+    from project.config import Config
 
 
 def get_page_from_name(name: str) -> Dict:
@@ -56,3 +58,26 @@ def get_wiki_page_names(with_synonyms: bool = False) -> List[str]:
         names += list(synonyms_to_names.keys())
         names = list(set(names))
     return names
+
+
+def get_page_lengths() -> List[int]:
+    """Get a list of all the page lengths, in characters
+
+    Returns:
+        List[int]: List of the number of characters in each wiki page
+    """
+    return [len(p) for p in wiki_data["contents"]]
+
+
+def get_wiki_synonyms_mapping() -> Dict[str, str]:
+    """Return a dict mapping synonyms to the name of the wiki pages
+
+    Returns:
+        Dict[str, str]: Dict mapping synonyms (and names) to names
+    """
+    with open(Config.Path.synonym_mapping, "r") as f:
+        return json.load(f)
+
+
+wiki_data = lf.load_data_wiki()
+synonyms_to_names = get_wiki_synonyms_mapping()
