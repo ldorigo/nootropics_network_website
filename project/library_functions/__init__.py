@@ -46,4 +46,6 @@ from .get_from_wiki import (
     get_number_of_links,
     get_number_of_categories,
     get_number_of_synonyms,
+    get_name_by,
+    get_top,
 )

@@ -1,5 +1,5 @@
 import json
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Tuple
 import random
 
 try:
@@ -83,7 +83,8 @@ def get_page_lengths() -> List[int]:
     Returns:
         List[int]: List of the number of characters in each wiki page
     """
-    return [len(p) for p in wiki_data["content"]]
+    wiki_data["length"] = [len(p) for p in wiki_data["content"]]
+    return wiki_data["length"]
 
 
 def get_number_of_links() -> List[int]:
@@ -93,10 +94,11 @@ def get_number_of_links() -> List[int]:
         List[int]: List of the number of links that each page has towards other pages
     """
     valid_links_numbers = []
+    wiki_data["valid_links"] = []
     for links in wiki_data["links"]:
-        valid_links_numbers.append(
-            len([link for link in links if link.lower() in all_names_and_synonyms])
-        )
+        valid_links = [link for link in links if link.lower() in all_names_and_synonyms]
+        valid_links_numbers.append(len(valid_links))
+        wiki_data["valid_links"].append(valid_links)
 
     return valid_links_numbers
 
@@ -119,3 +121,26 @@ def get_number_of_synonyms() -> List[int]:
     """
 
     return [len(syns) for syns in wiki_data["synonyms"]]
+
+
+def get_name_by(indices: List[int]) -> List[str]:
+    """Return the names corresponding to the indices passed as argument
+
+    Args:
+        indices (List[int]): List of indices of the pages for which to get names
+
+    Returns:
+        List[str]: List of names corresponding to the given indices
+    """
+    return [wiki_data["name"][i] for i in indices]
+
+
+def get_top(property: str, amount: int = 10, reverse=False) -> List[Tuple[str, int]]:
+    tuples = zip(
+        wiki_data["name"],
+        [p if type(p) == int else len(p) for p in wiki_data[property]],
+    )
+    sorted_tuples = sorted(
+        tuples, key=lambda x: x[1] if type(x[1]) == int else len(x[1]), reverse=reverse
+    )
+    return sorted_tuples[:amount]
