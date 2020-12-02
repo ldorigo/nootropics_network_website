@@ -67,7 +67,8 @@ def create_graph_reddit(
         def occurring_to_seldom(edge_attributes):
             return edge_attributes["count"] < min_edge_occurrences_to_link
 
-        edges_to_remove = w.graph.get_edges_by_conditions(g_reddit, occurring_to_seldom)
+        edges_to_remove = w.graph.get_edges_by_conditions(g_reddit,
+                                                          occurring_to_seldom)
 
         g_reddit.remove_edges_from(edges_to_remove)
 

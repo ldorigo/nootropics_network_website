@@ -5,6 +5,8 @@ from typing import Dict, List, Optional, Tuple, Union
 import community
 import networkx as nx
 from infomap import Infomap
+import numpy as np
+import plotly.graph_objects as go
 
 # %%
 
@@ -132,4 +134,9 @@ def assign_root_categories(
                 graph.nodes[node][name].append(inverse_mapping[category])
 
 
-# %%
+# def partition_from_nodes(graph: nx.)
+# # %%
+# def plot_partition_sizes(partition: Dict[str, int]):
+#     partitions_amount = len(set(partition.values()))
+#     partition_values = list(partition.values())
+#     unique, frequency = np.unique(partition_values, return_counts=True)
