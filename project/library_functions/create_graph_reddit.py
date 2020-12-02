@@ -6,6 +6,7 @@ try:
     import library_functions as lf
 except ModuleNotFoundError:
     import project.library_functions as lf
+
 import networkx as nx
 import numpy as np
 import wojciech as w

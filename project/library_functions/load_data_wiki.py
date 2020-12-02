@@ -1,5 +1,9 @@
 import json
-import library_functions as lf
+
+try:
+    import library_functions as lf
+except ModuleNotFoundError:
+    import project.library_functions as lf
 
 try:
     from config import Config

@@ -1,6 +1,7 @@
 #%%
 
 from typing import Dict, List, Optional, Tuple, Union
+
 import community
 import networkx as nx
 from infomap import Infomap

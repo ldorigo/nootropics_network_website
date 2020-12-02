@@ -1,22 +1,23 @@
 #%%
 
 from typing import Dict, List, Optional, Tuple, Union
+
 import community
+import matplotlib
 import networkx as nx
-from infomap import Infomap
 import numpy as np
 import plotly.graph_objects as go
 import spacy
-from tqdm.auto import tqdm
 import wojciech as w
-from wordcloud import WordCloud, STOPWORDS
-import matplotlib
+from infomap import Infomap
+from tqdm.auto import tqdm
+from wordcloud import STOPWORDS, WordCloud
 
 nlp = spacy.load("en_core_web_sm")
 
 
 #%%
-def assign_lemmas(graph: nx.Graph, save_spacy_docs = False):
+def assign_lemmas(graph: nx.Graph, save_spacy_docs=False):
     assert (
         "contents" in list(graph.nodes(data=True))[0][1]
     ), "The graph does not contain node contents."

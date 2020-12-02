@@ -1,13 +1,14 @@
 #%%
 
+import json
 import math
 from typing import Dict, List, Tuple, Union
-from networkx.drawing import layout
-from networkx.generators import line
+
+import networkx as nx
 import numpy as np
 import plotly.graph_objects as go
-import networkx as nx
-import json
+from networkx.drawing import layout
+from networkx.generators import line
 
 try:
     from config import Config

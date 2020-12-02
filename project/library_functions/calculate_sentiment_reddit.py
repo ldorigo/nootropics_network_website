@@ -4,6 +4,7 @@ try:
     from config import Config
 except ModuleNotFoundError:
     from project.config import Config
+
 from textblob import TextBlob
 from tqdm import tqdm
 
