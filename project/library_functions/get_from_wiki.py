@@ -1,6 +1,5 @@
-from collections import Set
 import json
-from typing import Dict, List
+from typing import Dict, List, Set
 import random
 
 try:
