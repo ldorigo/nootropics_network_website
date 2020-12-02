@@ -35,3 +35,6 @@ from .text_analysis import (
     rank_dict,
     wordcloud_from_nodes,
 )
+
+
+from .get_from_wiki import get_page_from_name, get_random_page
