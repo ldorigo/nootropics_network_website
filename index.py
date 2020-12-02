@@ -4,7 +4,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 from app import app
-from layouts import homepage, network
+from layouts import homepage, preliminary
 import callbacks
 
 
@@ -14,7 +14,7 @@ app.layout = html.Div(
         dbc.NavbarSimple(
             children=[
                 dbc.NavLink("Home", href="/page-1", id="page-1-link"),
-                dbc.NavLink("Page 2", href="/page-2", id="page-2-link"),
+                dbc.NavLink("Preliminary Analysis", href="/page-2", id="page-2-link"),
                 dbc.NavLink("Page 3", href="/page-3", id="page-3-link"),
             ],
             brand="Nootropics & Graphs",
@@ -43,8 +43,8 @@ def toggle_active_links(pathname):
 def render_page_content(pathname):
     if pathname in ["/", "/page-1"]:
         return homepage.homepage_layout
-        # elif pathname == "/page-2":
-        return network.network_layout
+    elif pathname == "/page-2":
+        return preliminary.preliminary_layout
     elif pathname == "/page-3":
         return html.P("Oh cool, this is page 3!")
     # If the user tries to reach a different page, return a 404 message
