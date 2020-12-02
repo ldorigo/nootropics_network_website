@@ -1,6 +1,10 @@
 # %%
 import json
-import library_functions as lf
+
+try:
+    import library_functions as lf
+except ModuleNotFoundError:
+    import project.library_functions as lf
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
@@ -8,7 +12,10 @@ import pandas as pd
 import powerlaw
 import wojciech as w
 
-from config import Config
+try:
+    from config import Config
+except ModuleNotFoundError:
+    from project.config import Config
 from fa2 import ForceAtlas2
 from operator import itemgetter
 from pandas_profiling import ProfileReport
@@ -18,8 +25,8 @@ from pathlib import Path
 g_wiki = lf.create_graph_wiki()
 g_reddit = lf.create_graph_reddit()
 g_reddit_post_length_limit = lf.create_graph_reddit(
-    max_drugs_in_post=10,
-    min_content_length_in_characters=25)
+    max_drugs_in_post=10, min_content_length_in_characters=25
+)
 
 g_reddit_max_10 = lf.create_graph_reddit(max_drugs_in_post=10)
 g_reddit_min_3_links = lf.create_graph_reddit(min_edge_occurrences_to_link=3)
@@ -27,25 +34,25 @@ g_reddit_min_3_links = lf.create_graph_reddit(min_edge_occurrences_to_link=3)
 g_reddit_chosen = lf.create_graph_reddit(
     max_drugs_in_post=10,
     min_edge_occurrences_to_link=3,
-    min_content_length_in_characters=25
+    min_content_length_in_characters=25,
 )
 
 # Positive sentiment
-conditions_positive = {'polarity': lambda x: x > 0.13}
+conditions_positive = {"polarity": lambda x: x > 0.13}
 g_reddit_positive = lf.create_graph_reddit(
     max_drugs_in_post=10,
     min_edge_occurrences_to_link=3,
     min_content_length_in_characters=25,
-    conditional_functions_dict=conditions_positive
+    conditional_functions_dict=conditions_positive,
 )
 
 # Negative sentiment
-conditions_negative = {'polarity': lambda x: x < 0.13}
+conditions_negative = {"polarity": lambda x: x < 0.13}
 g_reddit_negative = lf.create_graph_reddit(
     max_drugs_in_post=10,
     min_edge_occurrences_to_link=3,
     min_content_length_in_characters=25,
-    conditional_functions_dict=conditions_negative
+    conditional_functions_dict=conditions_negative,
 )
 
 
@@ -60,10 +67,10 @@ graphs = [
 ]
 
 graph_names = [
-    'Reddit Raw',
-    'Max 10 drugs in post',
-    'Min 3 occurrences for link',
-    'Only posts with 25+ characters'
+    "Reddit Raw",
+    "Max 10 drugs in post",
+    "Min 3 occurrences for link",
+    "Only posts with 25+ characters"
     # 'Reddit positive',
     # 'Reddit negative'
 ]
@@ -71,69 +78,63 @@ graph_names = [
 axess = lf.plot_comparison_of_attribute_distributions(
     graphs,
     graph_names=graph_names,
-    attribute_name='polarity_weighted',
-    attribute_parent='edge',
+    attribute_name="polarity_weighted",
+    attribute_parent="edge",
     attribute_function=None,
-    attribute_function_name='',
+    attribute_function_name="",
     as_probability_distribution=False,
     bins=np.linspace(-1, 1, 201),
-    show=False
+    show=False,
 )
 
 axess[0].set_xlim((-0.5, 0.5))
 plt.show()
 
 # %% Plot distribution of values of one instance (node or edge)
-graphs = [
-    g_reddit,
-    g_reddit_max_10,
-    g_reddit_min_3_links,
-    g_reddit_post_length_limit
-]
+graphs = [g_reddit, g_reddit_max_10, g_reddit_min_3_links, g_reddit_post_length_limit]
 
 graph_names = [
-    'Reddit Raw',
-    'Max 10 drugs in post',
-    'Min 3 occurrences for link',
-    'Only posts with 25+ characters'
+    "Reddit Raw",
+    "Max 10 drugs in post",
+    "Min 3 occurrences for link",
+    "Only posts with 25+ characters",
 ]
 
-instance = 'node'
-instance_label = 'caffeine'
-attribute_name = 'polarity'
+instance = "node"
+instance_label = "caffeine"
+attribute_name = "polarity"
 
 w.graph.plot_distribution_of_attribute_of_1_instance(
     graphs,
     instance=instance,
     instance_label=instance_label,
     attribute_name=attribute_name,
-    graph_names=graph_names
+    graph_names=graph_names,
 )
 
 # %% Plot degree distribution summary
 graphs_to_show = [g_reddit, g_wiki, w.graph.erdos_renyi_like(g_reddit)]
-graph_names = ['Reddit', 'Wiki', 'Random like Reddit']
-graph_colors = ['red', 'blue', 'green']
+graph_names = ["Reddit", "Wiki", "Random like Reddit"]
+graph_colors = ["red", "blue", "green"]
 
-w.graph.plot_degree_distribution_summary(graphs_to_show,
-                                         graph_names=graph_names,
-                                         graph_colors=graph_colors,
-                                         x_lim_lin=(-2, 100),
-                                         x_lim_log=(0.9, 1000))
+w.graph.plot_degree_distribution_summary(
+    graphs_to_show,
+    graph_names=graph_names,
+    graph_colors=graph_colors,
+    x_lim_lin=(-2, 100),
+    x_lim_log=(0.9, 1000),
+)
 
 # %% Most central nodes Wiki
-for centrality in ['degree', 'in-degree', 'out-degree', 'betweenness',
-                   'eigenvector']:
+for centrality in ["degree", "in-degree", "out-degree", "betweenness", "eigenvector"]:
     w.graph.most_central_nodes(g_wiki, centrality, n=10, printout=True)
 
 # %% Most central nodes Reddit
-for centrality in ['degree', 'betweenness', 'eigenvector']:
+for centrality in ["degree", "betweenness", "eigenvector"]:
     w.graph.most_central_nodes(g_reddit, centrality, n=10, printout=True)
 
 # %% In vs out degree Wiki
-w.graph.plot_in_vs_out_degree(g_wiki,
-                              plot_type='heatmap',
-                              colormap_norm='log')
+w.graph.plot_in_vs_out_degree(g_wiki, plot_type="heatmap", colormap_norm="log")
 plt.show()
 
 # %% Force Atlas plot Wiki
@@ -149,20 +150,20 @@ plt.show()
 
 # %% Degree stats
 graphs = [g_reddit, g_reddit_positive, g_reddit_negative]
-graph_names = ['Reddit', 'Reddit Positive', 'Reddit Negative']
+graph_names = ["Reddit", "Reddit Positive", "Reddit Negative"]
 
 degree_stats = dict()
 for graph, graph_name in zip(graphs, graph_names):
-    print(f'\n{graph_name}:')
+    print(f"\n{graph_name}:")
     degree_stats[graph_name] = w.graph.degree_statistics(graph, printout=True)
 
 # %% Most central nodes in different Reddit Graphs
 graphs = [g_reddit, g_reddit_positive, g_reddit_negative]
-graph_names = ['Reddit', 'Reddit Positive', 'Reddit Negative']
-centralities = ['degree']
+graph_names = ["Reddit", "Reddit Positive", "Reddit Negative"]
+centralities = ["degree"]
 
 for graph, graph_name in zip(graphs, graph_names):
-    print(f'\n{graph_name}:')
+    print(f"\n{graph_name}:")
     for centrality in centralities:
         w.graph.most_central_nodes(graph, centrality, n=10, printout=True)
 

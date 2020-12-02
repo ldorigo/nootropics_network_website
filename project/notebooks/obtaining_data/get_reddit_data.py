@@ -4,7 +4,11 @@ import os
 from pathlib import Path
 from typing import Generator
 from psaw import PushshiftAPI
-from config import Config
+
+try:
+    from config import Config
+except ModuleNotFoundError:
+    from project.config import Config
 
 # %%
 api = PushshiftAPI()

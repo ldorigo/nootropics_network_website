@@ -1,5 +1,9 @@
 import json
-from config import Config
+
+try:
+    from config import Config
+except ModuleNotFoundError:
+    from project.config import Config
 
 
 def load_data_reddit(alternative_path=None):

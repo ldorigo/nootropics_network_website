@@ -3,7 +3,11 @@
 
 from fa2 import ForceAtlas2
 import networkx as nx
-import library_functions as lf
+
+try:
+    import library_functions as lf
+except ModuleNotFoundError:
+    import project.library_functions as lf
 
 # %%
 
