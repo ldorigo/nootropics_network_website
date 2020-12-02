@@ -16,7 +16,7 @@ nlp = spacy.load("en_core_web_sm")
 
 
 #%%
-def assign_lemmas(graph: nx.Graph):
+def assign_lemmas(graph: nx.Graph, save_spacy_docs = False):
     assert (
         "contents" in list(graph.nodes(data=True))[0][1]
     ), "The graph does not contain node contents."
@@ -24,7 +24,8 @@ def assign_lemmas(graph: nx.Graph):
         doc = nlp.make_doc(" ".join(data["contents"]))
         lemmas = [i.lemma_.lower() for i in doc if not i.is_punct]
         graph.nodes[node]["lemmas"] = lemmas
-        # graph.nodes[node]["doc"] = doc
+        if save_spacy_docs:
+            graph.nodes[node]["doc"] = doc
 
 
 # %%

@@ -52,6 +52,8 @@ def create_graph_reddit(
             reddit_post["title"] + " " + reddit_post["content"],
             max_drugs_in_post,
             conditional_functions_dict,
+            include_link_contents=include_link_contents,
+            include_node_contents=include_node_contents,
         )
 
     # Remove the edges that occur fewer times than the threshold

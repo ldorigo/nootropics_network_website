@@ -65,6 +65,7 @@ class Config:
         reddit_graph = shared_data_folder / "reddit_graph.gpickle"
         wiki_gcc = shared_data_folder / "wiki_gcc.gpickle"
         reddit_gcc = shared_data_folder / "reddit_gcc.gpickle"
+        reddit_with_text = shared_data_folder / "reddit_with_textdata.gpickle"
 
     class Color:
         red = (1, 0, 0, 0.3)
