@@ -3,7 +3,7 @@ from .calculate_sentiment_reddit import calculate_sentiment_reddit
 from .create_graph_reddit import create_graph_reddit
 from .create_graph_wiki import create_graph_wiki
 from .load_data_reddit import load_data_reddit
-from .load_data_wiki import load_data_wiki
+from .load_data_wiki import load_data_wiki, load_synonym_mappings
 from .load_substance_names import load_substance_names
 from .plot_comparison_of_attribute_distributions import (
     plot_comparison_of_attribute_distributions,
