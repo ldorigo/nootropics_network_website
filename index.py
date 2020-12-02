@@ -4,7 +4,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 from app import app
-from layouts import homepage
+from layouts import homepage, network
 import callbacks
 
 
@@ -43,8 +43,8 @@ def toggle_active_links(pathname):
 def render_page_content(pathname):
     if pathname in ["/", "/page-1"]:
         return homepage.homepage_layout
-    elif pathname == "/page-2":
-        return html.P("This is the content of page 2. Yay!")
+        # elif pathname == "/page-2":
+        return network.network_layout
     elif pathname == "/page-3":
         return html.P("Oh cool, this is page 3!")
     # If the user tries to reach a different page, return a 404 message
