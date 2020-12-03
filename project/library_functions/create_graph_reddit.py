@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Any, Union
 
 from tqdm.auto import tqdm
 
@@ -21,6 +21,46 @@ def create_graph_reddit(
     include_node_contents=False,
     include_link_contents=False,
 ):
+    '''
+
+    Args:
+        max_drugs_in_post (int): a limit of the number of drugs in a post.
+                                 Postis containing more drugs will be
+                                 disregarded.
+        min_edge_occurrences_to_link (int): a limit describing the minimum
+                                            number of occurrences of the link.
+                                            The links that occur less times will
+                                            be disregarded.
+        min_content_length_in_characters (int): a limit describing the minimum
+                                                length of the content of the
+                                                Reddit post. Posts with shorter
+                                                content will be disregarded.
+        conditional_functions_dict (dict): a dictionary keyed by attribute names
+                                           whose values are functions that
+                                           represent conditions for those
+                                           attributes, e.g.
+                                           {'polarity': lambda x: x > 0.1}
+        include_node_contents (bool): A boolean determining whether to assign
+                                      the content of the posts containing a
+                                      drug as a node attribute.
+        include_link_contents (bool): A boolean determining whether to assign
+                                      the content of the posts containing the
+                                      linked drugs as an edge attribute.
+
+    Returns:
+
+    Examples:
+        >>> g_reddit = create_graph_reddit(
+        >>>        max_drugs_in_post=10,
+        >>>        min_edge_occurrences_to_link=3,
+        >>>        min_content_length_in_characters=25,
+        >>>        conditional_functions_dict={'polarity': lambda x: x > 0.1},
+        >>>        alternative_path=None,
+        >>>        include_node_contents=False,
+        >>>        include_link_contents=False
+        >>> )
+    '''
+
 
     # Make sure that conditional_functions_dict is a dict
     if conditional_functions_dict is None:
@@ -46,11 +86,15 @@ def create_graph_reddit(
             g_reddit.nodes[drug]["categories"] =\
                 wiki_data["categories"][index_drug]
 
-    # Link drugs
+    # Link drugs that appear in the same post
     for reddit_post in tqdm(list(drug_database_reddit.values())):
+
+        # Disregard the post if the length of its content does not
+        # surpass the threshold
         if len(reddit_post["content"]) < min_content_length_in_characters:
             continue
 
+        # Link the drugs and assign link attributes
         link_drugs(
             g_reddit,
             reddit_post["matches"],
@@ -102,11 +146,12 @@ def link_drugs(
     if (len(list_of_drugs) <= 1) or (len(list_of_drugs) > max_drugs_in_post):
         return
 
+    # Discard posts that do NOT meet the polarity criteria
     if "polarity" in conditional_functions_dict.keys():
         condition = conditional_functions_dict["polarity"]
         if not condition(polarity):
             return
-
+    # Discard posts that do NOT meet the subjectivity criteria
     if "subjectivity" in conditional_functions_dict.keys():
         condition = conditional_functions_dict["subjectivity"]
         if not condition(subjectivity):
@@ -129,6 +174,9 @@ def link_drugs(
         for other_drug in other_drugs:
             if (drug in G.nodes) & (other_drug in G.nodes):
                 edge = (drug, other_drug)
+
+                # If edge already exists, append the properties to their
+                # respective list
                 if G.has_edge(*edge):
                     G.edges[edge]["count"] += 1
                     G.edges[edge]["number_of_drugs_in_post"].append(
@@ -137,6 +185,8 @@ def link_drugs(
                     G.edges[edge]["subjectivity"].append(subjectivity)
                     if include_link_contents:
                         G.edges[edge]["content"].append(text)
+
+                # If the edge does not exist, initialize all the attributes
                 else:
                     G.add_edge(
                         *edge,
