@@ -48,6 +48,8 @@ from .get_from_wiki import (
     get_number_of_synonyms,
     get_name_by,
     get_top,
+    get_wiki_data,
+    get_root_category_mapping,
 )
 
 from .get_from_reddit import get_post_lengths, get_n_of_matches_per_post, get_top_posts

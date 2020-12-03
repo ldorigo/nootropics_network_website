@@ -117,13 +117,13 @@ def assign_root_categories(
     Args:
         graph (nx.Graph): nootropics graph
         wiki_data (Dict[str, List]): wikipedia data as obtained by lf.load_wiki_data
-        mapping (Dict[str, List[str]]): Dict of the form "root_category":["list","of","sub","categories"]
+        mapping (Dict[str, List[str]]): Dict of the form {"root_category":["list","of","sub","categories"]}
         name (str): name of the new node attribute to which to assign the mapping.
     """
     inverse_mapping = {}
     for category, subcategories in mapping.items():
         for subcategory in subcategories:
-            inverse_mapping[subcategory] = category
+            inverse_mapping[subcategory.lower()] = category.lower()
 
     names_to_categories = dict(zip(wiki_data["name"], wiki_data["categories"]))
     for node in graph.nodes:

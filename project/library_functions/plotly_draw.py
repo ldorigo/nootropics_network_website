@@ -53,8 +53,8 @@ def get_edge_traces(
         colors = [f"rgba(40,40,40,{a:.4f})" for a in alphas]
         widths = (logs / maxlog) * max_width
     else:
-        widths = np.repeat(0.5, len(edges_x))
-        colors = np.repeat("rgba(40,40,40,0.05)", len(edges_x))
+        widths = np.repeat(1, len(edges_x))
+        colors = np.repeat("rgba(40,40,40,0.1)", len(edges_x))
 
     edge_traces = []
     for i in range(len(edges_x)):
@@ -119,8 +119,8 @@ def get_nodes_trace(
 ):
     nodes_x = []
     nodes_y = []
-    colors = [] if node_color_attribute else "black"
-    sizes = [] if node_size_attribute else 20
+    colors = [] if node_color_attribute else "rgba(0,0,0,0.5)"
+    sizes = [] if node_size_attribute else 12
     for node, data in graph.nodes(data=True):
         nodes_x.append(positions[node][0])
         nodes_y.append(positions[node][1])
@@ -129,7 +129,10 @@ def get_nodes_trace(
                 assert (
                     node_color_attribute in data
                 ), f"Color attribute {node_color_attribute} not found in node data"
-                colors.append(data[node_color_attribute])
+                if data[node_color_attribute]:
+                    colors.append(data[node_color_attribute][0])
+                else:
+                    colors.append("None")
             else:
                 colors.append(graph.degree(node))
 
@@ -150,7 +153,8 @@ def get_nodes_trace(
         x=nodes_x,
         y=nodes_y,
         text=hovers,
-        marker={"color": colors, "size": sizes, "sizemin": 5, "sizeref": 5},
+        marker_color=colors,
+        marker={"size": sizes, "sizemin": 5, "sizeref": 5},
         mode="markers",
         hoverinfo="text",
     )
@@ -166,6 +170,7 @@ def draw_graph_plotly(
     node_color_attribute: str = None,
     node_size_attribute: str = None,
     edge_hover_attributes: List[str] = None,
+    size_dict: Dict[str, int] = None,
 ):
 
     # If no positions are passed, compute spring layout positioning
@@ -188,18 +193,22 @@ def draw_graph_plotly(
     data = edge_traces if edges_only else edge_traces + [node_trace]
 
     annotations = compute_annotations(graph=graph)
-    figure = go.FigureWidget(
+    figure = go.Figure(
         data=data,
         layout=go.Layout(
-            autosize=False,
-            width=1200,
-            height=1200,
+            # autosize=False,
+            # width=1200,
+            # height=1200,
             showlegend=False,
             margin={"l": 20, "r": 20, "t": 25, "b": 25},
             xaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
             yaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
         ),
     )
+    if size_dict:
+        figure.update_layout(
+            autosize=False, width=size_dict["width"], height=size_dict["height"]
+        )
     figure.add_annotation(annotations)
     return figure
 
