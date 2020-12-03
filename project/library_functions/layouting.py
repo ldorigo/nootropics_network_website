@@ -8,9 +8,9 @@ try:
 except ModuleNotFoundError:
     import project.library_functions as lf
 try:
-    from config import Config
+    from library_functions.config import Config
 except ModuleNotFoundError:
-    from project.config import Config
+    from project.library_functions.config import Config
 
 # %%
 
@@ -82,7 +82,7 @@ def get_fa2_layout(
 
     if save:
         with open(Config.Path.shared_data_folder / save, "w") as f:
-            json.dump(f, layout)
+            json.dump(layout, f)
     return layout
 
 

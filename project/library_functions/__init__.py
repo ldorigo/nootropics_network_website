@@ -51,3 +51,5 @@ from .get_from_wiki import (
 )
 
 from .get_from_reddit import get_post_lengths, get_n_of_matches_per_post, get_top_posts
+
+from .plotly_draw import draw_graph_plotly
