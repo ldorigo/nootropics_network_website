@@ -1,5 +1,5 @@
 import json
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Literal, Set, Tuple
 import random
 
 try:
@@ -14,6 +14,11 @@ except ModuleNotFoundError:
 # pre-fetch/compute some stuff to make computations faster
 
 wiki_data = lf.load_data_wiki()
+with open(Config.Path.wiki_mechanism_categories, "r") as f:
+    mechanism_categories_mapping = json.load(f)
+
+with open(Config.Path.wiki_mechanism_categories, "r") as f:
+    effects_categories_mapping = json.load(f)
 
 
 def get_page_from_name(name: str) -> Dict:
@@ -144,3 +149,21 @@ def get_top(property: str, amount: int = 10, reverse=False) -> List[Tuple[str, i
         tuples, key=lambda x: x[1] if type(x[1]) == int else len(x[1]), reverse=reverse
     )
     return sorted_tuples[:amount]
+
+
+def get_wiki_data() -> Dict:
+    """Get a copy of the wiki_data dict
+
+    Returns:
+        Dict: shallow copy of the wiki_data dict
+    """
+    return wiki_data.copy()
+
+
+def get_root_category_mapping(which: Literal["effects", "mechanisms"]) -> Dict:
+    if which == "effects":
+        return effects_categories_mapping.copy()
+    elif which == "mechanisms":
+        return mechanism_categories_mapping
+    else:
+        raise RuntimeError("Can only be one of 'effects','mechanisms'")

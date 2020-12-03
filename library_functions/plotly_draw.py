@@ -4,8 +4,11 @@ import json
 from typing import Dict, List, Tuple, Union
 
 import networkx as nx
+from networkx.algorithms.bipartite.basic import color
 import numpy as np
 import plotly.graph_objects as go
+import plotly.express as px
+import pandas as pd
 
 try:
     from library_functions.config import Config
@@ -53,8 +56,8 @@ def get_edge_traces(
         colors = [f"rgba(40,40,40,{a:.4f})" for a in alphas]
         widths = (logs / maxlog) * max_width
     else:
-        widths = np.repeat(0.5, len(edges_x))
-        colors = np.repeat("rgba(40,40,40,0.05)", len(edges_x))
+        widths = np.repeat(1, len(edges_x))
+        colors = np.repeat("rgba(40,40,40,0.1)", len(edges_x))
 
     edge_traces = []
     for i in range(len(edges_x)):
@@ -112,49 +115,60 @@ def get_nodes_hover(graph: nx.Graph) -> List[str]:
 
 def get_nodes_trace(
     graph: nx.Graph,
-    node_weight_attribute: str = None,
     node_color_attribute: str = None,
     node_size_attribute: str = None,
     positions: Dict[Union[str, int], Tuple[int, int]] = None,
 ):
-    nodes_x = []
-    nodes_y = []
-    colors = [] if node_color_attribute else "black"
-    sizes = [] if node_size_attribute else 20
-    for node, data in graph.nodes(data=True):
-        nodes_x.append(positions[node][0])
-        nodes_y.append(positions[node][1])
-        if node_color_attribute:
-            if node_color_attribute != "degree":
-                assert (
-                    node_color_attribute in data
-                ), f"Color attribute {node_color_attribute} not found in node data"
-                colors.append(data[node_color_attribute])
-            else:
-                colors.append(graph.degree(node))
 
-        if node_size_attribute:
-            if node_size_attribute != "degree":
-                assert (
-                    node_size_attribute in data
-                ), f"Size attribute {node_size_attribute} not found in node data"
-                sizes.append(data[node_size_attribute])
-            else:
-                sizes.append(graph.degree(node))
+    nodes_df = pd.DataFrame(dict(graph.nodes(data=True))).T.convert_dtypes()
+    nodes_df["x"] = [x for x, y in positions.values()]
+    nodes_df["y"] = [y for x, y in positions.values()]
+    nodes_df["degree"] = dict(graph.degree()).values()
+    nodes_df["empty"] = 0
 
+    if node_color_attribute and nodes_df[node_color_attribute].dtype == "object":
+        nodes_df[node_color_attribute] = nodes_df[node_color_attribute].apply(
+            lambda x: x[0] if x else "None"
+        )
+    # if not node_color_attribute:
+    #     node_color_attribute = "empty"
+    # if not node_size_attribute:
+    #     node_size_attribute = "empty"
     hovers = get_nodes_hover(graph)
 
-    node_names = list(graph.nodes)
+    # node_names = list(graph.nodes)
 
-    node_trace = go.Scatter(
-        x=nodes_x,
-        y=nodes_y,
-        text=hovers,
-        marker={"color": colors, "size": sizes, "sizemin": 5, "sizeref": 5},
-        mode="markers",
-        hoverinfo="text",
-    )
+    # This is stupid but plotly is retarted
+    if node_color_attribute and node_size_attribute:
+        node_trace = px.scatter(
+            nodes_df,
+            x="x",
+            y="y",
+            color=node_color_attribute,
+            size=node_size_attribute,
+        )
+    elif node_color_attribute:
+        node_trace = px.scatter(
+            nodes_df,
+            x="x",
+            y="y",
+            color=node_color_attribute,
+        )
+    elif node_size_attribute:
+        node_trace = px.scatter(
+            nodes_df,
+            x="x",
+            y="y",
+            color=node_size_attribute,
+        )
+    else:
+        node_trace = px.scatter(
+            nodes_df,
+            x="x",
+            y="y",
+        )
 
+    node_trace.update_traces(hovertext=hovers, hoverinfo="text")
     return node_trace
 
 
@@ -166,6 +180,7 @@ def draw_graph_plotly(
     node_color_attribute: str = None,
     node_size_attribute: str = None,
     edge_hover_attributes: List[str] = None,
+    size_dict: Dict[str, int] = None,
 ):
 
     # If no positions are passed, compute spring layout positioning
@@ -186,22 +201,29 @@ def draw_graph_plotly(
     )
 
     data = edge_traces if edges_only else edge_traces + [node_trace]
+    for trace in edge_traces:
+        node_trace.add_trace(trace)
 
-    annotations = compute_annotations(graph=graph)
-    figure = go.FigureWidget(
-        data=data,
-        layout=go.Layout(
-            autosize=False,
-            width=1200,
-            height=1200,
-            showlegend=False,
-            margin={"l": 20, "r": 20, "t": 25, "b": 25},
-            xaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
-            yaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
-        ),
-    )
-    figure.add_annotation(annotations)
-    return figure
+    node_trace.update_layout(showlegend=False)
+    # annotations = compute_annotations(graph=graph)
+    # figure = go.Figure(
+    #     data=data,
+    #     layout=go.Layout(
+    #         # autosize=False,
+    #         # width=1200,
+    #         # height=1200,
+    #         # showlegend=False,
+    #         margin={"l": 20, "r": 20, "t": 25, "b": 25},
+    #         xaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
+    #         yaxis={"showgrid": False, "zeroline": False, "showticklabels": False},
+    #     ),
+    # )
+    # if size_dict:
+    #     figure.update_layout(
+    #         autosize=False, width=size_dict["width"], height=size_dict["height"]
+    #     )
+    # figure.add_annotation(annotations)
+    return node_trace
 
 
 def compute_annotations(graph: nx.Graph):
