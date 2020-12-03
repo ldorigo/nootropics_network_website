@@ -2,9 +2,9 @@ import json
 from typing import Dict
 
 try:
-    from config import Config
+    from library_functions.config import Config
 except ModuleNotFoundError:
-    from project.config import Config
+    from project.library_functions.config import Config
 
 
 def save_synonym_mapping(wiki_data: Dict):

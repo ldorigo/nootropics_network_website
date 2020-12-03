@@ -1,14 +1,13 @@
 #%%
 import json
 import os
-from pathlib import Path
 from typing import Generator
 from psaw import PushshiftAPI
 
 try:
-    from config import Config
+    from library_functions.config import Config
 except ModuleNotFoundError:
-    from project.config import Config
+    from project.library_functions.config import Config
 
 # %%
 api = PushshiftAPI()

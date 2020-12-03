@@ -1,7 +1,6 @@
 # To add a new cell, type '# %%'
 # To add a new markdown cell, type '# %% [markdown]'
 # %%
-from IPython import get_ipython
 
 # %%
 # get_ipython().run_line_magic("load_ext", "autoreload")
@@ -9,17 +8,13 @@ from IPython import get_ipython
 # get_ipython().run_line_magic("autoreload", "2")
 # get_ipython().run_line_magic("matplotlib", "inline")
 from tqdm import tqdm
-from config import Config
+from library_functions.config import Config
 import library_functions as lf
 import wojciech as w
-from ipywidgets import widgets
 import json
 import community
-import plotly.graph_objects as go
-import matplotlib.pyplot as plt
 
 import networkx as nx
-import matplotlib
 
 # %% [markdown]
 #  ## Detecting Communities and visualizing them

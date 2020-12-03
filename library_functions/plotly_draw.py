@@ -1,19 +1,16 @@
 #%%
 
 import json
-import math
 from typing import Dict, List, Tuple, Union
 
 import networkx as nx
 import numpy as np
 import plotly.graph_objects as go
-from networkx.drawing import layout
-from networkx.generators import line
 
 try:
-    from config import Config
+    from library_functions.config import Config
 except:
-    from project.config import Config
+    from project.library_functions.config import Config
 
 # %%
 with open(Config.Path.contents_per_substance, "r+") as f:
