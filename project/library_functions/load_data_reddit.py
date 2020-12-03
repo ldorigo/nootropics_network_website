@@ -1,9 +1,9 @@
 import json
 
 try:
-    from config import Config
+    from library_functions.config import Config
 except ModuleNotFoundError:
-    from project.config import Config
+    from project.library_functions.config import Config
 
 
 def load_data_reddit(alternative_path=None):

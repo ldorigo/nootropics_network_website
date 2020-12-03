@@ -7,9 +7,9 @@ except ModuleNotFoundError:
     import project.library_functions as lf
 
 try:
-    from config import Config
+    from library_functions.config import Config
 except ModuleNotFoundError:
-    from project.config import Config
+    from project.library_functions.config import Config
 from wojciech.lowercase import lowercase
 
 

@@ -5,7 +5,7 @@ class Config:
     class Path:
 
         # Project root
-        project_root = Path(__file__).parent
+        project_root = Path(__file__).parent.parent
 
         # Private data (not added to git to save space and bandwidth)
         private_data_folder = project_root / "private_data"

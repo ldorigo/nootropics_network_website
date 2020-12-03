@@ -1,14 +1,13 @@
 # %%
 #
-from json.decoder import JSONDecodeError
 import spacy
 import json
 from json import JSONDecodeError
 
 try:
-    from config import Config
+    from library_functions.config import Config
 except ModuleNotFoundError:
-    from project.config import Config
+    from project.library_functions.config import Config
 from tqdm.auto import tqdm
 from spacy.matcher import PhraseMatcher
 from pathlib import Path

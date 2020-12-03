@@ -22,6 +22,7 @@ def create_graph_reddit(
     include_link_contents=False,
 ):
 
+    # Make sure that conditional_functions_dict is a dict
     if conditional_functions_dict is None:
         conditional_functions_dict = dict()
 
@@ -34,15 +35,16 @@ def create_graph_reddit(
     g_reddit = nx.Graph()
     g_reddit.add_nodes_from(substance_names)
 
-    # Initialize mention counts and assign categories from Wikipedia
-    # to nodes (drugs)
+    # Assign node properties. Note thad we use drug names as nodes, and that
+    # the drug names are taken from Wikipedia
     for index_drug, drug in enumerate(wiki_data["name"]):
         if drug in g_reddit.nodes:
             g_reddit.nodes[drug]["count"] = 0
             g_reddit.nodes[drug]["polarity"] = []
             g_reddit.nodes[drug]["subjectivity"] = []
             g_reddit.nodes[drug]["contents"] = []
-            g_reddit.nodes[drug]["categories"] = wiki_data["categories"][index_drug]
+            g_reddit.nodes[drug]["categories"] =\
+                wiki_data["categories"][index_drug]
 
     # Link drugs
     for reddit_post in tqdm(list(drug_database_reddit.values())):
@@ -117,23 +119,24 @@ def link_drugs(
             G.nodes[drug]["polarity"].append(polarity)
             G.nodes[drug]["subjectivity"].append(subjectivity)
             if include_node_contents:
-                G.nodes[drug]["contents"].append(text)
+                G.nodes[drug]["content"].append(text)
 
     # Assign the edge attributes.
     for index in range(len(list_of_drugs)):
         drug = list_of_drugs[index]
-        other_drugs = list_of_drugs[(index + 1) :]
+        other_drugs = list_of_drugs[(index + 1):]
 
         for other_drug in other_drugs:
             if (drug in G.nodes) & (other_drug in G.nodes):
                 edge = (drug, other_drug)
                 if G.has_edge(*edge):
                     G.edges[edge]["count"] += 1
-                    G.edges[edge]["number_of_drugs_in_post"].append(len(list_of_drugs))
+                    G.edges[edge]["number_of_drugs_in_post"].append(
+                        len(list_of_drugs))
                     G.edges[edge]["polarity"].append(polarity)
                     G.edges[edge]["subjectivity"].append(subjectivity)
                     if include_link_contents:
-                        G.edges[edge]["contents"].append(text)
+                        G.edges[edge]["content"].append(text)
                 else:
                     G.add_edge(
                         *edge,
@@ -147,7 +150,8 @@ def link_drugs(
 
 def weigh_attribute(attribute_to_weigh, all_edge_attributes):
     value_attribute = np.array(all_edge_attributes[attribute_to_weigh])
-    number_of_drugs_in_post = np.array(all_edge_attributes["number_of_drugs_in_post"])
+    number_of_drugs_in_post =\
+        np.array(all_edge_attributes["number_of_drugs_in_post"])
     weights = 1 / (number_of_drugs_in_post - 1)
 
     number_of_posts_containing_link = all_edge_attributes["count"]

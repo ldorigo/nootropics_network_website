@@ -1,9 +1,8 @@
 # %%
 try:
-    from config import Config
+    from library_functions.config import Config
 except ModuleNotFoundError:
-    from project.config import Config
-import json
+    from project.library_functions.config import Config
 from library_functions import load_data_wiki, save_synonym_mapping
 
 # %%
