@@ -3,16 +3,24 @@ import dash_bootstrap_components as dbc
 import dash_html_components as html
 
 
-def make_table_from_items(items: List[Tuple], title):
+def make_table_from_items(items: List[Tuple], title: str):
+
+    if len(items[0]) == 2:
+        # if two elements per item, then just plaintext
+        body = [
+            html.Tr([html.Th(name.title()), html.Td(value)]) for name, value in items
+        ]
+    else:
+        # if 3, then third element is a link
+        body = [
+            html.Tr([html.Th(html.A(href=link, children=name.title())), html.Td(value)])
+            for name, value, link in items
+        ]
+
     table = dbc.Table(
         children=[
             html.Thead(title),
-            html.Tbody(
-                [
-                    html.Tr([html.Th(name.title()), html.Td(value)])
-                    for name, value in items
-                ]
-            ),
+            html.Tbody(body),
         ],
         borderless=True,
         striped=True,

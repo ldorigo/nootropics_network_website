@@ -4,9 +4,9 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 from app import app, server
-from layouts import homepage, preliminary
+from layouts import homepage, preliminary, community
 import callbacks
-
+from typing import Dict
 
 app.layout = html.Div(
     [
@@ -15,7 +15,8 @@ app.layout = html.Div(
             children=[
                 dbc.NavLink("Home", href="/page-1", id="page-1-link"),
                 dbc.NavLink("Preliminary Analysis", href="/page-2", id="page-2-link"),
-                dbc.NavLink("Page 3", href="/page-3", id="page-3-link"),
+                dbc.NavLink("Happy and sad networks", href="/page-3", id="page-3-link"),
+                dbc.NavLink("Communities", href="/page-4", id="page-4-link"),
             ],
             brand="Nootropics & Graphs",
             color="primary",
@@ -29,14 +30,14 @@ app.layout = html.Div(
 # this callback uses the current pathname to set the active state of the
 # corresponding nav link to true, allowing users to tell see page they are on
 @app.callback(
-    [Output(f"page-{i}-link", "active") for i in range(1, 4)],
+    [Output(f"page-{i}-link", "active") for i in range(1, 5)],
     [Input("url", "pathname")],
 )
 def toggle_active_links(pathname):
     if pathname == "/":
         # Treat page 1 as the homepage / index
         return True, False, False
-    return [pathname == f"/page-{i}" for i in range(1, 4)]
+    return [pathname == f"/page-{i}" for i in range(1, 5)]
 
 
 @app.callback(Output("page-content", "children"), [Input("url", "pathname")])
@@ -47,6 +48,8 @@ def render_page_content(pathname):
         return preliminary.preliminary_layout
     elif pathname == "/page-3":
         return html.P("Oh cool, this is page 3!")
+    elif pathname == "/page-4":
+        return community.community_layout
     # If the user tries to reach a different page, return a 404 message
     return dbc.Jumbotron(
         [

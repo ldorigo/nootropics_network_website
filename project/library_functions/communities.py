@@ -7,19 +7,26 @@ import networkx as nx
 from infomap import Infomap
 import numpy as np
 import plotly.graph_objects as go
+from collections import Counter
 
 # %%
 
 
 def assign_louvain_communities(
-    reddit_graph, wiki_graph=None, reddit_edge_weight="count"
+    reddit_graph: nx.Graph,
+    wiki_graph: nx.Graph = None,
+    reddit_edge_weight: str = "count",
+    others_threshold: int = 2,
 ) -> Union[nx.Graph, Tuple[nx.Graph, nx.Graph]]:
-    """Calculate communities using the louvain algorithm and assign them as property to the graphs node.
+    """ "Calculate communities using the louvain algorithm and assign them as property to the graphs node.
     if two graphs are given, also assign one graph's communities to the other's.
 
+
     Args:
-        reddit_graph ([type]): [description]
-        wiki_graph ([type], optional): [description]. Defaults to None.
+        reddit_graph (nx.Graph): Reddit Graph
+        wiki_graph (nx.Graph, optional): Wikipedia graph. Defaults to None.
+        reddit_edge_weight (str, optional): edge attribute to use for weighting. Defaults to "count".
+        others_threshold (int, optional): minimum size of the communities. Communities smaller than this are mapped to "other". Defaults to 2.
 
     Returns:
         Union[nx.Graph, Tuple[nx.Graph, nx.Graph]]: [description]
@@ -29,43 +36,81 @@ def assign_louvain_communities(
     )
     if wiki_graph:
         wiki_dendrogram = community.generate_dendrogram(wiki_graph)
+
+    # Iterate over reddit nodes to assign communities
     for node in reddit_graph:
-        reddit_graph.nodes[node][f"louvain_community_reddit"] = {}
+        # Iterate over all levels of the dendrogram
         for level in range(len(reddit_dendrogram) - 1):
+            actual_level = len(wiki_dendrogram) - 2 - level
+
             partition = community.partition_at_level(reddit_dendrogram, level)
-            reddit_graph.nodes[node][f"louvain_community_reddit"][level] = partition[
-                node
-            ]
+
+            node_community = partition[node]
+            counts = Counter(partition.values())
+            if counts[node_community] < others_threshold:
+                node_community = "other"
+            reddit_graph.nodes[node][
+                f"louvain_community_reddit_L{actual_level}"
+            ] = f"L{actual_level}-{node_community}"
         if wiki_graph:
             # Also add the community from the other graph to allow comparing
-            reddit_graph.nodes[node][f"louvain_community_wiki"] = {}
-            try:
-                for level in range(len(wiki_dendrogram) - 1):
-                    partition = community.partition_at_level(wiki_dendrogram, level)
-                    reddit_graph.nodes[node][f"louvain_community_wiki"][
-                        level
-                    ] = partition[node]
-            except:
-                reddit_graph.nodes[node]["louvain_community_wiki"] = -1
-    if wiki_graph:  # %%
-        for node in wiki_graph:
-            wiki_graph.nodes[node][f"louvain_community_wiki"] = {}
+            # Again, iterate over all levels in the dendrogram
             for level in range(len(wiki_dendrogram) - 1):
+                actual_level = len(wiki_dendrogram) - 2 - level
+
                 partition = community.partition_at_level(wiki_dendrogram, level)
-                wiki_graph.nodes[node][f"louvain_community_wiki"][level] = partition[
-                    node
-                ]
+
+                try:
+                    node_community = partition[node]
+                    counts = Counter(partition.values())
+                    if counts[node_community] < others_threshold:
+                        node_community = "other"
+
+                    reddit_graph.nodes[node][
+                        f"louvain_community_wiki_L{actual_level}"
+                    ] = f"L{actual_level}-{node_community}"
+
+                except:
+                    reddit_graph.nodes[node][
+                        f"louvain_community_wiki_L{level}"
+                    ] = f"L{level}-NONE"
+    if wiki_graph:
+        for node in wiki_graph:
+            for level in range(
+                len(wiki_dendrogram) - 1,
+            ):
+                actual_level = len(wiki_dendrogram) - 2 - level
+
+                partition = community.partition_at_level(wiki_dendrogram, level)
+                node_community = partition[node]
+
+                counts = Counter(partition.values())
+                if counts[node_community] < others_threshold:
+                    node_community = "other"
+
+                wiki_graph.nodes[node][
+                    f"louvain_community_wiki_L{actual_level}"
+                ] = f"L{actual_level}-{node_community}"
             # Also add the community from the other graph to allow comparing
 
-            wiki_graph.nodes[node][f"louvain_community_reddit"] = {}
-            try:
-                for level in range(len(reddit_dendrogram) - 1):
-                    partition = community.partition_at_level(reddit_dendrogram, level)
-                    wiki_graph.nodes[node][f"louvain_community_reddit"][
-                        level
-                    ] = partition[node]
-            except:
-                wiki_graph.nodes[node]["louvain_community_reddit"] = -1
+            for level in range(len(reddit_dendrogram) - 1):
+                actual_level = len(wiki_dendrogram) - 2 - level
+
+                partition = community.partition_at_level(reddit_dendrogram, level)
+
+                try:
+                    node_community = partition[node]
+
+                    counts = Counter(partition.values())
+                    if counts[node_community] < others_threshold:
+                        node_community = "other"
+                    wiki_graph.nodes[node][
+                        f"louvain_community_reddit_L{actual_level}"
+                    ] = f"L{actual_level}-{node_community}"
+                except:
+                    wiki_graph.nodes[node][
+                        f"louvain_community_reddit_L{level}"
+                    ] = f"L{level}-NONE"
 
     return (
         (reddit_graph, reddit_dendrogram, wiki_graph, wiki_dendrogram)

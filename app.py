@@ -5,7 +5,7 @@
 import dash
 
 import wojciech as w
-from project.config import Config
+from project.library_functions.config import Config
 from project.library_functions import plotly_draw
 from dash_bootstrap_components.themes import *
 
