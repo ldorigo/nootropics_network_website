@@ -1,4 +1,5 @@
 from typing import List, Any, Union
+from pathlib import Path
 
 from tqdm.auto import tqdm
 
@@ -13,22 +14,22 @@ import wojciech as w
 
 
 def create_graph_reddit(
-    max_drugs_in_post=np.inf,
-    min_edge_occurrences_to_link=1,
-    min_content_length_in_characters=0,
-    conditional_functions_dict=None,
-    alternative_path=None,
-    include_node_contents=False,
-    include_link_contents=False,
+    max_drugs_in_post: Union[int, np.int] = np.inf,
+    min_edge_occurrences_to_link: Union[int, np.int] = 1,
+    min_content_length_in_characters: Union[int, np.int] = 0,
+    conditional_functions_dict: Union[dict, Path] = None,
+    include_node_contents: bool = False,
+    include_link_contents: bool = False,
+    alternative_path: Union[str, Path] = None,
 ):
     '''
-
     Args:
         max_drugs_in_post (int): a limit of the number of drugs in a post.
-                                 Postis containing more drugs will be
+                                 Posts containing more drugs will be
                                  disregarded.
         min_edge_occurrences_to_link (int): a limit describing the minimum
-                                            number of occurrences of the link.
+                                            number times a link needs to appear
+                                            in order to be considered valid.
                                             The links that occur less times will
                                             be disregarded.
         min_content_length_in_characters (int): a limit describing the minimum
@@ -60,7 +61,6 @@ def create_graph_reddit(
         >>>        include_link_contents=False
         >>> )
     '''
-
 
     # Make sure that conditional_functions_dict is a dict
     if conditional_functions_dict is None:
