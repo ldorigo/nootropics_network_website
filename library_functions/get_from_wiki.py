@@ -17,7 +17,7 @@ wiki_data = lf.load_data_wiki()
 with open(Config.Path.wiki_mechanism_categories, "r") as f:
     mechanism_categories_mapping = json.load(f)
 
-with open(Config.Path.wiki_mechanism_categories, "r") as f:
+with open(Config.Path.wiki_effect_categories, "r") as f:
     effects_categories_mapping = json.load(f)
 
 
@@ -164,6 +164,6 @@ def get_root_category_mapping(which: Literal["effects", "mechanisms"]) -> Dict:
     if which == "effects":
         return effects_categories_mapping.copy()
     elif which == "mechanisms":
-        return mechanism_categories_mapping
+        return mechanism_categories_mapping.copy()
     else:
         raise RuntimeError("Can only be one of 'effects','mechanisms'")
