@@ -48,10 +48,10 @@ def assign_louvain_communities(
             node_community = partition[node]
             counts = Counter(partition.values())
             if counts[node_community] < others_threshold:
-                node_community = "other"
+                node_community = -1
             reddit_graph.nodes[node][
                 f"louvain_community_reddit_L{actual_level}"
-            ] = f"L{actual_level}-{node_community}"
+            ] = f"L{actual_level}-{node_community:03}"
         if wiki_graph:
             # Also add the community from the other graph to allow comparing
             # Again, iterate over all levels in the dendrogram
@@ -64,11 +64,11 @@ def assign_louvain_communities(
                     node_community = partition[node]
                     counts = Counter(partition.values())
                     if counts[node_community] < others_threshold:
-                        node_community = "other"
+                        node_community = -1
 
                     reddit_graph.nodes[node][
                         f"louvain_community_wiki_L{actual_level}"
-                    ] = f"L{actual_level}-{node_community}"
+                    ] = f"L{actual_level}-{node_community:03}"
 
                 except:
                     reddit_graph.nodes[node][
@@ -86,11 +86,11 @@ def assign_louvain_communities(
 
                 counts = Counter(partition.values())
                 if counts[node_community] < others_threshold:
-                    node_community = "other"
+                    node_community = -1
 
                 wiki_graph.nodes[node][
                     f"louvain_community_wiki_L{actual_level}"
-                ] = f"L{actual_level}-{node_community}"
+                ] = f"L{actual_level}-{node_community:03}"
             # Also add the community from the other graph to allow comparing
 
             for level in range(len(reddit_dendrogram) - 1):
@@ -103,10 +103,10 @@ def assign_louvain_communities(
 
                     counts = Counter(partition.values())
                     if counts[node_community] < others_threshold:
-                        node_community = "other"
+                        node_community = -1
                     wiki_graph.nodes[node][
                         f"louvain_community_reddit_L{actual_level}"
-                    ] = f"L{actual_level}-{node_community}"
+                    ] = f"L{actual_level}-{node_community:03}"
                 except:
                     wiki_graph.nodes[node][
                         f"louvain_community_reddit_L{level}"

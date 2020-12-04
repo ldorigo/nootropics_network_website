@@ -24,7 +24,9 @@ from .communities import (
     assign_root_categories,
 )
 
-from .overlaps import inverse_communities_from_partition, overlap
+from .overlaps import inverse_communities_from_partition, overlap, draw_overlaps_plotly
+
+from .flatten_list import flatten
 
 from .text_analysis import (
     assign_lemmas,

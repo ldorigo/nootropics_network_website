@@ -22,6 +22,7 @@ from project.library_functions import (
     get_top,
     get_top_posts,
     get_wiki_data,
+    draw_overlaps_plotly,
 )
 from project.library_functions.config import Config
 from project.library_functions.create_graph_wiki import create_graph_wiki
@@ -80,6 +81,20 @@ cyto_graph_wiki = cyto.Cytoscape(
     style={"width": "600pt", "height": "800pt"},
     stylesheet=stylesheet,
     elements=elements,
+)
+
+plot_louvain_1_vs_effects = draw_overlaps_plotly(
+    "louvain_community_wiki_L0", "effect_category", graph_wiki
+)
+plot_louvain_1_vs_mechanisms = draw_overlaps_plotly(
+    "louvain_community_wiki_L0", "mechanism_category", graph_wiki
+)
+
+plot_louvain_2_vs_effects = draw_overlaps_plotly(
+    "louvain_community_wiki_L1", "effect_category", graph_wiki
+)
+plot_louvain_2_vs_mechanisms = draw_overlaps_plotly(
+    "louvain_community_wiki_L1", "mechanism_category", graph_wiki
 )
 ####################################
 ############ Layout elements #####
@@ -216,10 +231,14 @@ def display_hover_data(value):
         stylesheet, legend = make_stylesheet(
             properties, color_node_by="louvain_community_wiki_L0"
         )
+        # doesn't make sense to show legend since communities are arbitrary
+        legend = {}
     elif value == "louvain_2":
         stylesheet, legend = make_stylesheet(
             properties, color_node_by="louvain_community_wiki_L1"
         )
+        # doesn't make sense to show legend since communities are arbitrary
+        legend = {}
     if not legend:
         legend = {}
 
@@ -251,6 +270,18 @@ def display_hover_data(value):
                     'GABA receptor ligands'  are psychoanaleptics.",
                 ]
             ),
+        ]
+    elif value == "louvain_1":
+
+        children = [
+            dcc.Graph(figure=plot_louvain_1_vs_mechanisms),
+            dcc.Graph(figure=plot_louvain_1_vs_effects),
+        ]
+    elif value == "louvain_2":
+
+        children = [
+            dcc.Graph(figure=plot_louvain_2_vs_mechanisms),
+            dcc.Graph(figure=plot_louvain_2_vs_effects),
         ]
     else:
         children = []
