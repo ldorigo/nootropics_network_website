@@ -27,9 +27,9 @@ forceatlas2 = ForceAtlas2(
     barnesHutTheta=1.2,
     multiThreaded=False,  # NOT IMPLEMENTED
     # Tuning
-    scalingRatio=1,
-    strongGravityMode=True,
-    gravity=0.1,
+    scalingRatio=5,
+    strongGravityMode=False,
+    gravity=1,
     # Log
     verbose=True,
 )
