@@ -119,8 +119,11 @@ w.graph.plot_degree_distribution_summary(
 )
 
 # %% Most central nodes Wiki
-for centrality in ["degree", "in-degree", "out-degree", "betweenness", "eigenvector"]:
-    w.graph.most_central_nodes(g_wiki, centrality, n=10, printout=True)
+centrality_measures = \
+    ["degree", "in-degree", "out-degree", "betweenness", "eigenvector"]
+
+most_central_nodes_wiki = \
+    w.graph.most_central_nodes(g_wiki, centrality_measures, n=10, printout=True)
 
 # %% Most central nodes Reddit
 for centrality in ["degree", "betweenness", "eigenvector"]:

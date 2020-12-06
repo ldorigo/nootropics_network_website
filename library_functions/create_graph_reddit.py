@@ -21,6 +21,7 @@ def create_graph_reddit(
     include_node_contents: bool = False,
     include_link_contents: bool = False,
     alternative_path: Union[str, Path] = None,
+    show_progress_bars: bool = False
 ):
     """
 
@@ -28,26 +29,33 @@ def create_graph_reddit(
         max_drugs_in_post (int): a limit of the number of drugs in a post.
                                  Posts containing more drugs will be
                                  disregarded.
+
         min_edge_occurrences_to_link (int): a limit describing the minimum
                                             number times a link needs to appear
                                             in order to be considered valid.
                                             The links that occur less times will
                                             be disregarded.
+
         min_content_length_in_characters (int): a limit describing the minimum
                                                 length of the content of the
                                                 Reddit post. Posts with shorter
                                                 content will be disregarded.
+
         conditional_functions_dict (dict): a dictionary keyed by attribute names
                                            whose values are functions that
                                            represent conditions for those
                                            attributes, e.g.
                                            {'polarity': lambda x: x > 0.1}
+
         include_node_contents (bool): A boolean determining whether to assign
                                       the content of the posts containing a
                                       drug as a node attribute.
+
         include_link_contents (bool): A boolean determining whether to assign
                                       the content of the posts containing the
                                       linked drugs as an edge attribute.
+
+        show_progress_bars (): A boolean deciding whether to show progress bars.
 
     Returns:
 
@@ -87,7 +95,8 @@ def create_graph_reddit(
             g_reddit.nodes[drug]["categories"] = wiki_data["categories"][index_drug]
 
     # Link drugs that appear in the same post
-    for reddit_post in tqdm(list(drug_database_reddit.values())):
+    for reddit_post in tqdm(list(drug_database_reddit.values()),
+                            disable=not show_progress_bars):
 
         # Disregard the post if the length of its content does not
         # surpass the threshold
@@ -120,7 +129,7 @@ def create_graph_reddit(
     # Weight the parameters
     attributes_to_weight = ["polarity", "subjectivity"]
 
-    for edge in tqdm(g_reddit.edges):
+    for edge in tqdm(g_reddit.edges, disable=not show_progress_bars):
         for attribute in attributes_to_weight:
             g_reddit.edges[edge][attribute + "_weighted"] = weigh_attribute(
                 attribute, g_reddit.edges[edge]
