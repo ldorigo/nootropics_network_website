@@ -72,7 +72,7 @@ def wordcloud_from_node(graph: nx.Graph, node: str):
 
 def wordcloud_from_nodes(graph: nx.Graph, nodes: List[str]):
     """Generate a wordcloud from a community (set of nodes).
-    Because the amount of combinations is enormous, this is generated on the fly and thus much slower than for single nodes.
+    Because the amount of possible combinations is enormous, this is generated on the fly and thus much slower than for single nodes.
 
     Args:
         graph (nx.Graph): Graph containing the nodes and the lemmas associated with each node.

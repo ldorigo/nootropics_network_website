@@ -4,7 +4,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 from app import app, server
-from layouts import homepage, preliminary, community
+from layouts import homepage, preliminary, community, text_analysis
 import callbacks
 from typing import Dict
 
@@ -17,6 +17,7 @@ app.layout = html.Div(
                 dbc.NavLink("Preliminary Analysis", href="/page-2", id="page-2-link"),
                 dbc.NavLink("Happy and sad networks", href="/page-3", id="page-3-link"),
                 dbc.NavLink("Communities", href="/page-4", id="page-4-link"),
+                dbc.NavLink("Text Analysis", href="/page-5", id="page-5-link"),
             ],
             brand="Nootropics & Graphs",
             color="primary",
@@ -36,7 +37,7 @@ app.layout = html.Div(
 def toggle_active_links(pathname):
     if pathname == "/":
         # Treat page 1 as the homepage / index
-        return True, False, False
+        return True, False, False, False
     return [pathname == f"/page-{i}" for i in range(1, 5)]
 
 
@@ -50,6 +51,8 @@ def render_page_content(pathname):
         return html.P("Oh cool, this is page 3!")
     elif pathname == "/page-4":
         return community.community_layout
+    elif pathname == "/page-5":
+        return text_analysis.text_analysis_layout
     # If the user tries to reach a different page, return a 404 message
     return dbc.Jumbotron(
         [
