@@ -1,4 +1,3 @@
-from project.library_functions.communities import assign_louvain_communities
 from typing import Dict, List
 
 import assets.texts as texts
@@ -25,64 +24,18 @@ from project.library_functions import (
     draw_overlaps_plotly,
 )
 from project.library_functions.config import Config
-from project.library_functions.create_graph_wiki import create_graph_wiki
-from project.library_functions.layouting import get_fa2_layout
 
 from utils.community_graphs import build_cytoscape_elements, make_stylesheet
 
-## initialization
-
-print("Displaying community page. Loading graphs...")
-graph_reddit = nx.readwrite.gpickle.read_gpickle(Config.Path.reddit_gcc)
-graph_wiki = nx.readwrite.gpickle.read_gpickle(Config.Path.wiki_gcc)
-print("Loading/computing layouts...")
-graph_reddit = w.graph.largest_connected_component(
-    create_graph_reddit(
-        max_drugs_in_post=8,
-        min_content_length_in_characters=30,
-        min_edge_occurrences_to_link=2,
-    )
-)
-graph_wiki = w.graph.largest_connected_component(create_graph_wiki().to_undirected())
-layout_reddit = get_fa2_layout(
+from utils.data import (
+    graph_reddit_gcc,
     graph_reddit,
-    edge_weight_attribute="count",
-    saved="reddit_filtered_weighted_gcc.json",
-)
-layout_wiki = get_fa2_layout(graph_wiki, saved="wiki_simple_noargs_gcc.json")
-## Assign "root categories" on wikipedia
-print("Assigning root categories...")
-assign_root_categories(
     graph_wiki,
-    wiki_data=get_wiki_data(),
-    mapping=get_root_category_mapping(which="effects"),
-    name="effect_category",
+    layout_reddit,
+    layout_wiki,
 )
 
-assign_root_categories(
-    graph_wiki,
-    wiki_data=get_wiki_data(),
-    mapping=get_root_category_mapping(which="mechanisms"),
-    name="mechanism_category",
-)
-assign_root_categories(
-    graph_reddit,
-    wiki_data=get_wiki_data(),
-    mapping=get_root_category_mapping(which="effects"),
-    name="effect_category",
-)
-assign_root_categories(
-    graph_reddit,
-    wiki_data=get_wiki_data(),
-    mapping=get_root_category_mapping(which="mechanisms"),
-    name="mechanism_category",
-)
 
-## Assign louvain communities on both networks
-print("Assigning Louvain categories")
-_, reddit_dendrogram, _, wiki_dendrogram = assign_louvain_communities(
-    graph_reddit, graph_wiki, reddit_edge_weight="count", others_threshold=4
-)
 ####################################
 ############ Generate elements #####
 ####################################
@@ -98,7 +51,7 @@ elements_wiki, properties_wiki = build_cytoscape_elements(
     ],
 )
 elements_reddit, properties_reddit = build_cytoscape_elements(
-    graph_reddit,
+    graph_reddit_gcc,
     positions=layout_reddit,
     node_attributes=[
         "mechanism_category",
