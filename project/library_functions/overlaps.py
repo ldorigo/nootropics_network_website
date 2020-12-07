@@ -5,11 +5,16 @@ import networkx as nx
 import numpy as np
 import wojciech as w
 import plotly.figure_factory as ff
+import pickle
 
 try:
     import library_functions as lf
 except ModuleNotFoundError:
     import project.library_functions as lf
+try:
+    from library_functions.config import Config
+except ModuleNotFoundError:
+    from project.library_functions.config import Config
 
 
 def inverse_communities_from_partition(
@@ -72,7 +77,21 @@ def overlap(
     }
 
 
-def overlap_matrix(attribute_A: str, attribute_B: str, graph: nx.Graph):
+def overlap_matrix(
+    attribute_A: str, attribute_B: str, graph: nx.Graph, savename: str = None
+):
+    """Given two attributes that are used to hold the category of nodes within a graph,
+    return a matrix that contains the overlaps of each category represented by attribute_A
+    and each category represented by attribute_B
+
+    Args:
+        attribute_A (str): name of the node attribute containing the first category
+        attribute_B (str):  name of the node attribute containing the second category
+        graph (nx.Graph): 2D numpy array containing the overlaps
+
+    Returns:
+        [type]: np.Array
+    """
     try:
         all_A_attributes = list(
             set([data for _, data in graph.nodes(data=attribute_A)])
@@ -100,10 +119,34 @@ def overlap_matrix(attribute_A: str, attribute_B: str, graph: nx.Graph):
             groups_overlap = overlap(nodes_a, nodes_b)["overlap_proportion"]
             result[i, j] = groups_overlap
 
+    if savename:
+        np.save(Config.Path.shared_data_folder / savename, result)
     return result, all_A_attributes, all_B_attributes
 
 
-def draw_overlaps_plotly(attribute_A, attribute_B, graph):
+def draw_overlaps_plotly(
+    attribute_A: str,
+    attribute_B: str,
+    graph: nx.Graph,
+    save: str = None,
+    saved: str = None,
+):
+    """Get a 2D-histogram showing how much the categories of two categorization systems of the nodes in a graph overlap each other.
+
+    Args:
+        attribute_A (str): name of the node attribute containing the first category
+        attribute_B (str): name of the node attribute containing the second category
+        graph (nx.Graph): networkx graph whose nodes have the two attributes above
+        saved (str, optional): Name file containing a pre-computed figure. Defaults to None.
+        save (str, optional): Name file to which to save the figure. Defaults to None.
+
+    Returns:
+        [type]: plotly figure containing the 2D histogram
+    """
+    if saved:
+        with open(Config.Path.shared_data_folder / saved, "rb") as f:
+            return pickle.load(f)
+
     overlaps, A, B = overlap_matrix(
         attribute_A=attribute_A, attribute_B=attribute_B, graph=graph
     )
@@ -111,10 +154,17 @@ def draw_overlaps_plotly(attribute_A, attribute_B, graph):
     fig = ff.create_annotated_heatmap(
         z=overlaps,
         text=overlaps,
-        x=B,
-        y=A,
+        x=[b.title() for b in B],
+        y=[f"Com. {i+1}" for i in range(len(A))],
         annotation_text=heatmap_text,
         colorscale="Greys",
         hoverinfo="z",
     )
+    for i in range(len(fig.layout.annotations)):
+        fig.layout.annotations[i].font.size = 8
+
+    if save:
+        with open(Config.Path.shared_data_folder / save, "wb+") as f:
+            pickle.dump(fig, f)
+
     return fig
