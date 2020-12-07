@@ -11,16 +11,6 @@ import wojciech as w
 from app import app
 from dash.dependencies import Input, Output
 from project.library_functions import (
-    assign_root_categories,
-    create_graph_reddit,
-    create_graph_wiki,
-    draw_graph_plotly,
-    get_fa2_layout,
-    get_name_by,
-    get_root_category_mapping,
-    get_top,
-    get_top_posts,
-    get_wiki_data,
     draw_overlaps_plotly,
 )
 from project.library_functions.config import Config
@@ -69,9 +59,10 @@ cyto_graph_wiki = cyto.Cytoscape(
     id="cyto_graph_wiki",
     layout={"name": "preset"},
     responsive=True,
-    minZoom=0.5,
+    zoom=0.1,
+    minZoom=0.05,
     maxZoom=3,
-    style={"width": "600pt", "height": "800pt"},
+    style={"width": "100%", "height": "500px"},
     stylesheet=stylesheet_wiki,
     elements=elements_wiki,
 )
@@ -80,26 +71,52 @@ cyto_graph_reddit = cyto.Cytoscape(
     id="cyto_graph_reddit",
     layout={"name": "preset"},
     responsive=True,
-    minZoom=0.5,
+    zoom=0.3,
+    minZoom=0.1,
     maxZoom=3,
-    style={"width": "600pt", "height": "800pt"},
+    style={"width": "100%", "height": "500pt"},
     stylesheet=stylesheet_reddit,
     elements=elements_reddit,
 )
 
 print("Computing 2D-heatmaps of category overlaps")
-plot_louvain_1_vs_effects = draw_overlaps_plotly(
-    "louvain_community_wiki_L0", "effect_category", graph_wiki
+hist2d_louvain_1_vs_effects = draw_overlaps_plotly(
+    "louvain_community_wiki_L0",
+    "effect_category",
+    graph_wiki,
+    saved="hist2d_louvain_1_vs_effects",
 )
-plot_louvain_1_vs_mechanisms = draw_overlaps_plotly(
-    "louvain_community_wiki_L0", "mechanism_category", graph_wiki
+hist2d_louvain_1_vs_mechanisms = draw_overlaps_plotly(
+    "louvain_community_wiki_L0",
+    "mechanism_category",
+    graph_wiki,
+    saved="hist2d_louvain_1_vs_mechanisms",
 )
 
-plot_louvain_2_vs_effects = draw_overlaps_plotly(
-    "louvain_community_wiki_L1", "effect_category", graph_wiki
+hist2d_louvain_2_vs_effects = draw_overlaps_plotly(
+    "louvain_community_wiki_L1",
+    "effect_category",
+    graph_wiki,
+    saved="hist2d_louvain_2_vs_effects",
 )
-plot_louvain_2_vs_mechanisms = draw_overlaps_plotly(
-    "louvain_community_wiki_L1", "mechanism_category", graph_wiki
+hist2d_louvain_2_vs_mechanisms = draw_overlaps_plotly(
+    "louvain_community_wiki_L1",
+    "mechanism_category",
+    graph_wiki,
+    saved="hist2d_louvain_2_vs_mechanisms",
+)
+
+hist2d_louvain_reddit_vs_effects = draw_overlaps_plotly(
+    "louvain_community_reddit_L0",
+    "effect_category",
+    graph_reddit_gcc,
+    saved="hist2d_louvain_reddit_vs_effects",
+)
+hist2d_louvain_reddit_vs_mechanisms = draw_overlaps_plotly(
+    "louvain_community_reddit_L0",
+    "mechanism_category",
+    graph_reddit_gcc,
+    saved="hist2d_louvain_reddit_vs_mechanisms",
 )
 ####################################
 ############ Layout elements #####
@@ -109,29 +126,36 @@ community_layout = html.Div(
         dcc.Store(id="wiki_legend_store"),
         dcc.Store(id="reddit_legend_store"),
         html.H3(
-            "Finding 'communities': which substances are often mentionned together?"
+            children=[
+                "Finding",
+                html.Em(" Communities "),
+                ": which substances are often mentionned together?".title(),
+            ]
         ),
         html.P(
             "Now that we have looked at how the graphs are built, we can get to the meat of it: actually analyzing usage patterns."
         ),
         html.P(
-            "Our idea is that by looking at which nootropics are most often mentionned together, it's possible to derive information about\
-        what the most common combinations of nootropics are, and how they relate to one another."
+            "Our idea is that by looking at which nootropics are most often mentionned together,\
+            it may possible to derive information about what the most popular combinations of \
+                nootropics are, and how they relate to one another."
         ),
         html.H4("Wikipedia Communities"),
         html.P(
-            "To get a feel for how this works, let's start by looking at the communities that are detected on WikiPedia. The dataset is simpler (much fewer links), and we found that the separation into communities was much clearer."
+            "To get a feel for how this works, let's start by looking at the communities that are detected on WikiPedia.\
+            The dataset is simpler (much fewer links), and we found that the separation into communities was much clearer."
         ),
         dbc.Container(
             children=[
                 dbc.Row(
                     [
+                        dbc.Col(cyto_graph_wiki, width=9),
                         dbc.Col(
                             children=[
                                 dbc.FormGroup(
                                     [
                                         dbc.Label(
-                                            "Select the attribute by which to color the nodes"
+                                            "Color nodes by:",
                                         ),
                                         dbc.Select(
                                             id="select_root_category_wiki",
@@ -142,7 +166,7 @@ community_layout = html.Div(
                                                 },
                                                 {
                                                     "label": "Wikipedia Categories",
-                                                    "value": "none",
+                                                    "value": "wikicats",
                                                     "disabled": True,
                                                 },
                                                 {
@@ -155,16 +179,12 @@ community_layout = html.Div(
                                                 },
                                                 {
                                                     "label": "Autodetected Communities",
-                                                    "value": "none",
+                                                    "value": "auto",
                                                     "disabled": True,
                                                 },
                                                 {
                                                     "label": "Louvain Categories - Top Level",
                                                     "value": "louvain_1",
-                                                },
-                                                {
-                                                    "label": "Louvain Categories - Level 2",
-                                                    "value": "louvain_2",
                                                 },
                                             ],
                                             value="none",
@@ -175,7 +195,6 @@ community_layout = html.Div(
                             ],
                             width=3,
                         ),
-                        dbc.Col(cyto_graph_wiki, width=9),
                     ]
                 ),
                 dbc.Row(
@@ -192,7 +211,6 @@ community_layout = html.Div(
                                     be determined by using network analysis algorithm, select one of the coloring schemes above.",
                                     className="card-text",
                                 ),
-                                html.Hr(),
                                 html.Div(
                                     "",
                                     className="card-text",
@@ -204,10 +222,12 @@ community_layout = html.Div(
                 ),
             ]
         ),
+        html.Hr(),
         html.H4("Reddit Communities"),
         html.P(
             "Here comes one of the main questions we had when setting out to analyse our data: can we actually derive information about the underlying properties of nootropics\
-            starting from just reddit discussions? The following visualization is similar to the above, except here all links are extracted by finding nootropics that are mentionned together in reddit posts."
+            starting from just reddit discussions? The following visualization is similar to the above, except here all links are extracted by finding nootropics that are mentionned together in reddit posts.",
+            style={"margin-bottom": "12em"},
         ),
         dbc.Container(
             children=[
@@ -250,7 +270,7 @@ community_layout = html.Div(
                                                     "value": "louvain_reddit",
                                                 },
                                             ],
-                                            value="none",
+                                            value="louvain_reddit",
                                         ),
                                     ]
                                 ),
@@ -267,7 +287,21 @@ community_layout = html.Div(
                             [
                                 html.H4("More Info", className="card-title"),
                                 html.Div(
-                                    "",
+                                    children=[
+                                        html.P(
+                                            children=[
+                                                "It's immediately clear that the clustering doesn't work as well in this case: most of the nodes form a big blob in the center.\
+                                    There are several reasons to this, and the main one is that this graph is very densely connected - in network science terms, it's \
+                                    closer to a ",
+                                                html.Em("random network"),
+                                                " than to a ",
+                                                html.Em("scale-free network"),
+                                                ' like the WikiPedia network above. While it is still possible to find "nicer" layouts than what you see above, the python \
+                                                implementation of the force-atlas 2 algorithm is quite limited, and that is the best that we were able to do. \
+                                                Once more, you are invited to chose different coloring schemes to see the effects of automatic community detection.',
+                                            ]
+                                        )
+                                    ],
                                     className="card-text",
                                 ),
                                 html.Hr(),
@@ -331,6 +365,7 @@ def display_wiki_graph_info(value):
         children = []
     elif value in ["effect", "mechanism"]:
         children = [
+            html.Hr(),
             html.H4("Wikipedia Categories"),
             html.P(
                 children=[
@@ -358,14 +393,38 @@ def display_wiki_graph_info(value):
     elif value == "louvain_1":
 
         children = [
-            dcc.Graph(figure=plot_louvain_1_vs_mechanisms),
-            dcc.Graph(figure=plot_louvain_1_vs_effects),
-        ]
-    elif value == "louvain_2":
-
-        children = [
-            dcc.Graph(figure=plot_louvain_2_vs_mechanisms),
-            dcc.Graph(figure=plot_louvain_2_vs_effects),
+            html.Hr(),
+            html.H5("Comparing autodetected communities to wikipedia categories"),
+            html.P(
+                children=[
+                    "The two 2-D histograms below show, for each detected community (L0-...),\
+                 the overlap of that community with each of the categories on wikipedia. \
+                     "
+                ]
+            ),
+            html.H6("Drugs by mechanism of action"),
+            dcc.Graph(figure=hist2d_louvain_1_vs_mechanisms),
+            html.P(
+                children=[
+                    "There are two categories that have a sizeable overlap with the communities detected by the algorithm: ",
+                    html.Em("GABA receptor ligands"),
+                    " and ",
+                    html.Em("Monoamine releasing agents"),
+                    ". It's curious that these specific two categories were recognized by the algorithm - and it may be interesting, \
+                had we more time, to investigate why.",
+                ]
+            ),
+            html.H6("Drugs by Psychological Effect"),
+            dcc.Graph(figure=hist2d_louvain_1_vs_effects),
+            html.P(
+                children=[
+                    "In this case, there is only one community and one category which were found to have a sizeable overlap: ",
+                    html.Em("Stimulants"),
+                    ". Once more, we are unsure why this specific community was the only one to have a significan overlap - but it is interesting to see that there is at least ",
+                    html.Em("some "),
+                    "overlap between autodetected communities and existing categories of the corresponding nodes.",
+                ]
+            ),
         ]
     else:
         children = []
@@ -383,16 +442,35 @@ def show_legends_wiki(data):
         return []
 
     else:
-        children = []
+        body = []
         for name, color in sorted(data.items(), key=lambda x: x[0]):
-            children.append(
-                html.P(
-                    children=[
-                        html.Span("⬤", style={"color": color}),
-                        f" - {name.title().replace('_', ' ')}",
+            body.append(
+                html.Tr(
+                    [
+                        html.Th(
+                            html.Span("⬤", style={"color": color}),
+                            style={"padding": "0.5rem"},
+                        ),
+                        html.Td(
+                            f"{name.title().replace('_', ' ')}",
+                            style={"padding": "0.5rem"},
+                        ),
                     ]
-                )
+                ),
             )
+
+        children = html.Div(
+            dbc.Table(
+                children=[
+                    html.Thead("Legend"),
+                    html.Tbody(body),
+                ],
+                borderless=True,
+                striped=True,
+                hover=True,
+            ),
+            style={"max-height": "400px", "overflow": "scroll"},
+        )
         return children
 
 
@@ -432,41 +510,30 @@ def display_reddit_graph_info(value):
         children = []
     elif value in ["effect", "mechanism"]:
         children = [
-            html.H4("redditpedia Categories"),
+            html.H4("Wikipedia Categories... again"),
             html.P(
                 children=[
-                    "The ",
-                    html.A(
-                        "Drugs by psychological effects",
-                        href="https://en.redditpedia.org/reddit/Category:Drugs_by_psychological_effects",
-                    ),
-                    " and ",
-                    html.A(
-                        "Psychoactive drugs by mechanism of action",
-                        href="https://en.redditpedia.org/reddit/Category:Psychoactive_drugs_by_mechanism_of_action",
-                    ),
-                    " are the two main redditPedia categories by which the substances can be categorized. \
-                    As you can see, the ForceAtlas algorithm shows that these categories are quite well represented \
-                    in the way that the nodes link to each other: looking at the coloring by effect, stimulants are all on top, \
-                    Psycholeptics are on the bottom-left, etc. Interestingly, there is a big cluster of nodes on the right that have no category:\
-                    Those are actually supplements (vitamins etc.), which aren't categorized here.   \
-                    One neat thing about these two colorings is that they can show which effects are related to which mechanisms:\
-                    For instance, 'Excitatory Amino Acid Receptor Ligands' seem to all be psychoanaleptics, while \
-                    'GABA receptor ligands'  are psychoanaleptics.",
+                    "Out of curiosity, we tried to color the nodes on the extracted reddit network by using the categories that we took from wikipedia. The \
+                    idea was that if the network structure reflected those categories, they would appear as spatially well-defined areas in the network.\
+                    As you can see, the results were mixed: when coloring by",
+                    html.Em("mechanism of action"),
+                    "there is one large area that is covered by",
+                    html.Em("psychoanaleptics"),
+                    ", but little else is visible (in fact, the rest of the network has mostly no category under this categorization).\
+                    ",
                 ]
             ),
         ]
-    elif value == "louvain_1":
+    elif value == "louvain_reddit":
 
         children = [
-            dcc.Graph(figure=plot_louvain_1_vs_mechanisms),
-            dcc.Graph(figure=plot_louvain_1_vs_effects),
-        ]
-    elif value == "louvain_2":
-
-        children = [
-            dcc.Graph(figure=plot_louvain_2_vs_mechanisms),
-            dcc.Graph(figure=plot_louvain_2_vs_effects),
+            html.H4("Autodetected Categories"),
+            html.P(
+                "Once more, we used the louvain algorithm to autodetect communities in the graph. \
+                And, once more, we looked at how those communities overlap with the two main categorizations we chose."
+            ),
+            dcc.Graph(figure=hist2d_louvain_reddit_vs_effects),
+            dcc.Graph(figure=hist2d_louvain_reddit_vs_mechanisms),
         ]
     else:
         children = []
@@ -484,14 +551,33 @@ def show_legends_reddit(data):
         return []
 
     else:
-        children = []
+        body = []
         for name, color in sorted(data.items(), key=lambda x: x[0]):
-            children.append(
-                html.P(
-                    children=[
-                        html.Span("⬤", style={"color": color}),
-                        f" - {name.title().replace('_', ' ')}",
+            body.append(
+                html.Tr(
+                    [
+                        html.Th(
+                            html.Span("⬤", style={"color": color}),
+                            style={"padding": "0.5rem"},
+                        ),
+                        html.Td(
+                            f"{name.title().replace('_', ' ')}",
+                            style={"padding": "0.5rem"},
+                        ),
                     ]
-                )
+                ),
             )
+
+        children = html.Div(
+            dbc.Table(
+                children=[
+                    html.Thead("Legend"),
+                    html.Tbody(body),
+                ],
+                borderless=True,
+                striped=True,
+                hover=True,
+            ),
+            style={"max-height": "400px", "overflow": "scroll"},
+        )
         return children

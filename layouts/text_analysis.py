@@ -1,10 +1,12 @@
 from typing import Literal
 import dash_core_components as dcc
 from dash_core_components.Dropdown import Dropdown
+from dash_core_components.Loading import Loading
 import dash_html_components as html
 from dash_html_components.Hr import Hr
 from networkx.algorithms.shortest_paths.generic import shortest_path
 from nltk.util import usage
+from plotly.subplots import make_subplots
 import assets.texts as texts
 import dash_bootstrap_components as dbc
 from utils.preliminary_graphs import get_wiki_plots_figure, get_reddit_plots_figure
@@ -21,9 +23,17 @@ from app import app
 from project.library_functions.config import Config
 from layouts.community import graph_reddit
 import urllib
+import networkx as nx
+import plotly.express as px
+import plotly.graph_objects as go
+from utils.data import graph_reddit_gcc
 
 all_names_and_synonyms = get_wiki_page_names(with_synonyms=True)
 synonym_mapping = get_wiki_synonyms_mapping()
+
+names_and_synonyms_in_reddit = {
+    i for i in all_names_and_synonyms if synonym_mapping[i] in graph_reddit_gcc.nodes()
+}
 
 
 def wordcloud_from_substance(substance_name: str, type: Literal["reddit", "wiki"]):
@@ -52,6 +62,33 @@ def wordclouds_from_substance(substance_name: str):
             ),
         ]
     return res
+
+
+def sentiment_histograms_from_substance(graph: nx.Graph, substance: str):
+    name = synonym_mapping[substance.lower()]
+    polarities = graph.nodes[name]["polarity"]
+    subjectivities = graph.nodes[name]["subjectivity"]
+    plot = make_subplots(
+        rows=2,
+        cols=1,
+        subplot_titles=(
+            "Polarity",
+            "Subjectivity",
+        ),
+    )
+    plot.add_trace(
+        go.Histogram(x=polarities, xbins_size=0.1),
+        row=1,
+        col=1,
+    )
+    plot.add_trace(
+        go.Histogram(x=subjectivities, xbins_size=0.05),
+        row=2,
+        col=1,
+    )
+    plot.update_xaxes(range=[-1, 1], row=1, col=1)
+    plot.update_xaxes(range=[0, 1], row=2, col=1)
+    return plot
 
 
 text_analysis_layout = html.Div(
@@ -85,8 +122,24 @@ text_analysis_layout = html.Div(
                         'modafinil' (another stimulant), 'theanine' (a popular nootropic that is very often taken with caffeine to avoid its side-effects), etc.\
                         Another interesting thing that we were hoping to see, is that a lot of the effects and side effects associated with caffeine can be seen on the \
                         reddit wordcloud - much more so than on the wiki one: 'focus', 'anxiety', 'stimulant', 'sleep', 'awake', 'crash', etc.\
-                        Finally, another fascinating thing that we had not thought about, is that a lot of *dosage*in formation is present (albeit not very readable/understandable in this form)!       "
+                        Finally, another fascinating thing that we had not thought about, is that a lot of *dosage*in formation is present (albeit not very readable/understandable in this form)!       ",
+            style={"margin-top": "20pt"},
         ),
+        html.H5("Sentiment Analysis and Polarity"),
+        html.P(
+            children=[
+                "Using the ",
+                html.A(
+                    href="https://textblob.readthedocs.io/en/dev/", children="TextBlob"
+                ),
+                " library, it's possible to easily extract two key metrics from a blob of text: its ",
+                html.Em("polarity"),
+                ", - i.e., negative vs. positive sentiment, as well as its",
+                html.Em("subjectivity."),
+                " By looking at the distribution of these two metrics for a substance, we can learn much about its perception by its users. For instance, here it is for caffeine:",
+            ]
+        ),
+        dcc.Graph(figure=sentiment_histograms_from_substance(graph_reddit, "caffeine")),
         html.H4("And mixed wordclouds!"),
         html.P(
             "The same approach as above can be applied to just posts that mention two specific nootropics. This makes it possible to see what the most relevant words are for that specific connection."
@@ -118,7 +171,7 @@ text_analysis_layout = html.Div(
                                             id="wordcloud_select_dropdown",
                                             options=[
                                                 {"label": i.title(), "value": i}
-                                                for i in all_names_and_synonyms
+                                                for i in names_and_synonyms_in_reddit
                                             ],
                                             placeholder="Phemibut, modafinil, ...",
                                         ),
@@ -128,7 +181,9 @@ text_analysis_layout = html.Div(
                                     ]
                                 )
                             ),
-                            dbc.Row(id="selected_wordcloud_container", children=[]),
+                            dcc.Loading(
+                                dbc.Row(id="selected_wordcloud_container", children=[]),
+                            ),
                         ]
                     ),
                 ]
@@ -143,12 +198,40 @@ text_analysis_layout = html.Div(
     Input("wordcloud_select_dropdown", "value"),
 )
 def show_wordcloud_for_nootropic(chosen_nootropic):
-    children = wordclouds_from_substance(substance_name=chosen_nootropic)
-    if len(children) == 1:
+    children = []
+    if not chosen_nootropic:
+        return []
+    if chosen_nootropic != synonym_mapping[chosen_nootropic]:
         children.append(
-            html.P(
-                "Note: The chosen nootropic was not found in the reddit network, \
-                so only its  WikiPedia wordcloud is shown."
+            dbc.Col(
+                html.P(
+                    f"Note: The name you entered was resolved to its main name, {synonym_mapping[chosen_nootropic]}"
+                ),
+                className="alert alert-success",
+                width=12,
             )
         )
+    wordclouds = wordclouds_from_substance(substance_name=chosen_nootropic)
+    children += wordclouds
+    if len(wordclouds) == 1:
+        children.append(
+            dbc.Col(
+                html.P(
+                    "Note: The chosen nootropic was not found in the reddit network, \
+                    so only its  WikiPedia wordcloud is shown."
+                ),
+                className="alert alert-warning",
+                width=12,
+            )
+        )
+    children.append(
+        dbc.Col(
+            dcc.Graph(
+                figure=sentiment_histograms_from_substance(
+                    graph_reddit, chosen_nootropic
+                )
+            ),
+            width=12,
+        )
+    )
     return children
