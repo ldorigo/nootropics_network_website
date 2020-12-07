@@ -18,15 +18,15 @@ def create_graph_wiki():
     for index_drug, drug in enumerate(wiki_data["name"]):
         if drug in g_wiki.nodes:
             g_wiki.nodes[drug]["categories"] = wiki_data["categories"][index_drug]
-            g_wiki.nodes[drug]["content"] = wiki_data["content"]
-            g_wiki.nodes[drug]["url"] = wiki_data["url"]
+            g_wiki.nodes[drug]["content"] = wiki_data["content"][index_drug]
+            g_wiki.nodes[drug]["url"] = wiki_data["url"][index_drug]
 
     # Add node properties.
     for index_drug, drug in enumerate(wiki_data["name"]):
         if drug in g_wiki.nodes:
             g_wiki.nodes[drug]["categories"] = wiki_data["categories"][index_drug]
-            g_wiki.nodes[drug]["content"] = wiki_data["content"]
-            g_wiki.nodes[drug]["url"] = wiki_data["url"]
+            g_wiki.nodes[drug]["content"] = wiki_data["content"][index_drug]
+            g_wiki.nodes[drug]["url"] = wiki_data["url"][index_drug]
 
     # Add edges.
     for index_drug, drug in enumerate(wiki_data["name"]):

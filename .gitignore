@@ -10,3 +10,6 @@ shared_data/reddit_with_textdata
 
 venv
 .idea
+.idea/final_project_new.iml
+.idea/misc.xml
+wordclouds

@@ -16,14 +16,28 @@ from wordcloud import STOPWORDS, WordCloud
 nlp = spacy.load("en_core_web_sm")
 
 
+def get_lemmas(text, get_doc=False):
+    doc = nlp.make_doc(text)
+    lemmas = [i.lemma_.lower() for i in doc if not i.is_punct]
+    if not get_doc:
+        return lemmas
+    else:
+        return (lemmas, doc)
+
+
 #%%
 def assign_lemmas(graph: nx.Graph, save_spacy_docs=False):
     assert (
         "contents" in list(graph.nodes(data=True))[0][1]
+        or "content" in list(graph.nodes(data=True))[0][1]
     ), "The graph does not contain node contents."
     for node, data in tqdm(graph.nodes(data=True)):
-        doc = nlp.make_doc(" ".join(data["contents"]))
-        lemmas = [i.lemma_.lower() for i in doc if not i.is_punct]
+        try:
+            text = " ".join(data["contents"])
+        except:
+            text = data["content"]
+
+        lemmas, doc = get_lemmas(text, get_doc=True)
         graph.nodes[node]["lemmas"] = lemmas
         if save_spacy_docs:
             graph.nodes[node]["doc"] = doc
@@ -63,10 +77,49 @@ def assign_tf_idfs(graph: nx.Graph):
         graph.nodes[node]["tf-idfs"] = tfidfs
 
 
-def wordcloud_from_node(graph: nx.Graph, node: str):
+def assign_text_analysis(graph: nx.Graph):
+    """Apply (and assign as attribute) all the steps necessary to get tf-idfs
+
+    Args:
+        graph (nx.Graph): networkx graph with nodes containing a "content" or "contents" attribute
+    """
+    assign_lemmas(graph)
+    assign_tfs(graph)
+    assign_idfs(graph)
+    assign_tf_idfs(graph)
+
+
+def wordcloud_from_node(graph: nx.Graph, node: str, color_func):
     wc = WordCloud(
-        background_color="white", width=1800, height=1000, collocations=False
+        background_color="white",
+        width=900,
+        height=900,
+        collocations=False,
+        color_func=color_func,
     ).generate_from_frequencies(graph.nodes[node]["tf-idfs"])
+    return wc
+
+
+def wordcloud_from_link(graph: nx.Graph, n1, n2):
+    edgetext = " ".join(graph.edges[(n1, n2)]["contents"])
+    lemmas = get_lemmas(edgetext)
+    tfs = w.nlp.term_frequency(terms=None, document=lemmas, type="frequency")
+
+    all_lemmas = [data["lemmas"] for node_, data in graph.nodes(data=True)]
+    idfs = w.nlp.inverse_document_frequency(
+        terms=None, documents=all_lemmas, term_document=lemmas, type="regular"
+    )
+
+    tfidfs = {}
+    for lemma in lemmas:
+        tfidfs[lemma] = tfs[lemma] * idfs[lemma]
+
+    wc = WordCloud(
+        background_color="white",
+        width=900,
+        height=900,
+        collocations=False,
+    ).generate_from_frequencies(tfidfs)
     return wc
 
 
@@ -105,6 +158,10 @@ def wordcloud_from_nodes(graph: nx.Graph, nodes: List[str]):
     ).generate_from_frequencies(tf_idfs)
 
     return wc
+
+
+def compute_dosage_mentions(reddit_data):
+    pass
 
 
 def rank_dict(dict_: Dict[str, float], verbose=False, reverse=False):
