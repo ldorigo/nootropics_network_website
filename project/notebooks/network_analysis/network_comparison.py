@@ -166,6 +166,7 @@ for graph, graph_name in zip(graphs, graph_names):
 # %% Save graphs to pickle
 nx.readwrite.gpickle.write_gpickle(g_reddit, Config.Path.reddit_graph)
 nx.readwrite.gpickle.write_gpickle(g_wiki, Config.Path.wiki_digraph)
+
 # %% Let's look at the GCC's and undirected graphs for the following.
 
 gcc_wiki_dir = w.graph.largest_connected_component(g_wiki)
