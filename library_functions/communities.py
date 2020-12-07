@@ -32,16 +32,18 @@ def assign_louvain_communities(
         Union[nx.Graph, Tuple[nx.Graph, nx.Graph]]: [description]
     """
     reddit_dendrogram = community.generate_dendrogram(
-        reddit_graph, weight=reddit_edge_weight
+        reddit_graph, weight=reddit_edge_weight, resolution=0.7
     )
     if wiki_graph:
-        wiki_dendrogram = community.generate_dendrogram(wiki_graph)
+        wiki_dendrogram = community.generate_dendrogram(
+            wiki_graph,
+        )
 
     # Iterate over reddit nodes to assign communities
     for node in reddit_graph:
         # Iterate over all levels of the dendrogram
         for level in range(len(reddit_dendrogram) - 1):
-            actual_level = len(wiki_dendrogram) - 2 - level
+            actual_level = len(reddit_dendrogram) - 2 - level
 
             partition = community.partition_at_level(reddit_dendrogram, level)
 
@@ -94,7 +96,7 @@ def assign_louvain_communities(
             # Also add the community from the other graph to allow comparing
 
             for level in range(len(reddit_dendrogram) - 1):
-                actual_level = len(wiki_dendrogram) - 2 - level
+                actual_level = len(reddit_dendrogram) - 2 - level
 
                 partition = community.partition_at_level(reddit_dendrogram, level)
 
