@@ -47,7 +47,7 @@ comments_path = Config.Path.private_data_folder / "reddit_data" / "comments"
 # %%
 
 submission_files = list(submissions_path.glob("**/*"))
-comments_files = list(comments_path.glob("**/*"))
+# comments_files = list(comments_path.glob("**/*"))
 
 # %%
 def get_submissions_generator(submission_files):
@@ -57,12 +57,15 @@ def get_submissions_generator(submission_files):
                 yield (json.load(f), file)
             except JSONDecodeError:
                 pass
-    for file in tqdm(comments_files):
-        with open(file, "r") as f:
-            try:
-                yield (json.load(f), file)
-            except JSONDecodeError:
-                pass
+    try:
+        for file in tqdm(comments_files):
+            with open(file, "r") as f:
+                try:
+                    yield (json.load(f), file)
+                except JSONDecodeError:
+                    pass
+    except NameError:
+        pass
 
 
 # %%
@@ -83,13 +86,13 @@ submission_doc_generator = get_submission_doc_generator(submission_generator)
 
 # %%
 match_generator = (
-    (matcher(text), submission, path)
+    (matcher(text), submission, path, text)
     for text, submission, path in submission_doc_generator
 )
 # %%
 
 submissions_dict = {}
-for matches, submission, path in match_generator:
+for matches, submission, path, doc in match_generator:
     # Get the found mathches actual name
     matches_resolved = [matcher.vocab[match[0]].text for match in matches]
     # Eliminate duplicates
@@ -98,6 +101,7 @@ for matches, submission, path in match_generator:
         continue
     # Add to the submission and save back to file. Also add to large reddit dictionnary
     submission["matches"] = matches_unique
+    submission["n_of_words"] = len(doc)
     with open(path, "w") as f:
         json.dump(submission, f)
     submissions_dict[submission["id"]] = submission

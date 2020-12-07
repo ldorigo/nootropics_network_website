@@ -1,18 +1,5 @@
 # %%
-
-try:
-    import library_functions as lf
-except ModuleNotFoundError:
-    import project.library_functions as lf
-import matplotlib.pyplot as plt
-import networkx as nx
-import numpy as np
-import wojciech as w
-
-try:
-    from library_functions.config import Config
-except ModuleNotFoundError:
-    from project.library_functions.config import Config
+from library_functions.initialize_explainer_notebook import *
 
 # %% Create graphs
 g_wiki = lf.create_graph_wiki()
