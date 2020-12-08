@@ -19,7 +19,6 @@ from utils.community_graphs import build_cytoscape_elements, make_stylesheet
 
 from utils.data import (
     graph_reddit_gcc,
-    graph_reddit,
     graph_wiki,
     layout_reddit,
     layout_wiki,
@@ -46,7 +45,8 @@ elements_reddit, properties_reddit = build_cytoscape_elements(
     node_attributes=[
         "mechanism_category",
         "effect_category",
-        "louvain_community_reddit_L0",
+        "louvain_community_reddit_R1.00_L0",
+        "louvain_community_reddit_R0.60_L0",
         "louvain_community_wiki_L0",
         "louvain_community_wiki_L1",
     ],
@@ -266,8 +266,12 @@ community_layout = html.Div(
                                                     "disabled": True,
                                                 },
                                                 {
-                                                    "label": "Louvain Categories - Top Level",
+                                                    "label": "Louvain Categories - Coarse Grained",
                                                     "value": "louvain_reddit",
+                                                },
+                                                {
+                                                    "label": "Louvain Categories - Fine Grained",
+                                                    "value": "louvain_reddit_r07",
                                                 },
                                             ],
                                             value="louvain_reddit",
@@ -498,7 +502,13 @@ def display_reddit_graph_info(value):
         )
     elif value == "louvain_reddit":
         stylesheet, legend = make_stylesheet(
-            properties_reddit, color_node_by="louvain_community_reddit_L0"
+            properties_reddit, color_node_by="louvain_community_reddit_R1.00_L0"
+        )
+        # doesn't make sense to show legend since communities are arbitrary
+        legend = {}
+    elif value == "louvain_reddit_r07":
+        stylesheet, legend = make_stylesheet(
+            properties_reddit, color_node_by="louvain_community_reddit_R0.60_L0"
         )
         # doesn't make sense to show legend since communities are arbitrary
         legend = {}

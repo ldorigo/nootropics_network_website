@@ -9,31 +9,25 @@ from nltk.util import usage
 from plotly.subplots import make_subplots
 import assets.texts as texts
 import dash_bootstrap_components as dbc
-from utils.preliminary_graphs import get_wiki_plots_figure, get_reddit_plots_figure
 from utils.utils import make_table_from_items
 from dash.dependencies import Input, Output
 from project.library_functions import (
     get_name_by,
     get_top,
     get_top_posts,
-    get_wiki_page_names,
-    get_wiki_synonyms_mapping,
 )
 from app import app
 from project.library_functions.config import Config
-from layouts.community import graph_reddit
 import urllib
 import networkx as nx
 import plotly.express as px
 import plotly.graph_objects as go
-from utils.data import graph_reddit_gcc
-
-all_names_and_synonyms = get_wiki_page_names(with_synonyms=True)
-synonym_mapping = get_wiki_synonyms_mapping()
-
-names_and_synonyms_in_reddit = {
-    i for i in all_names_and_synonyms if synonym_mapping[i] in graph_reddit_gcc.nodes()
-}
+from utils.data import (
+    graph_reddit_gcc,
+    all_names_and_synonyms,
+    synonym_mapping,
+    names_and_synonyms_in_reddit,
+)
 
 
 def wordcloud_from_substance(substance_name: str, type: Literal["reddit", "wiki"]):
@@ -46,7 +40,7 @@ def wordclouds_from_substance(substance_name: str):
     name = synonym_mapping[substance_name.lower()]
     wc_wiki = wordcloud_from_substance(substance_name=substance_name, type="wiki")
 
-    if name in set(graph_reddit.nodes()):
+    if name in set(graph_reddit_gcc.nodes()):
         res = [
             dbc.Col(wc_wiki, width=6),
             dbc.Col(
@@ -139,7 +133,9 @@ text_analysis_layout = html.Div(
                 " By looking at the distribution of these two metrics for a substance, we can learn much about its perception by its users. For instance, here it is for caffeine:",
             ]
         ),
-        dcc.Graph(figure=sentiment_histograms_from_substance(graph_reddit, "caffeine")),
+        dcc.Graph(
+            figure=sentiment_histograms_from_substance(graph_reddit_gcc, "caffeine")
+        ),
         html.H4("And mixed wordclouds!"),
         html.P(
             "The same approach as above can be applied to just posts that mention two specific nootropics. This makes it possible to see what the most relevant words are for that specific connection."
@@ -173,7 +169,7 @@ text_analysis_layout = html.Div(
                                                 {"label": i.title(), "value": i}
                                                 for i in names_and_synonyms_in_reddit
                                             ],
-                                            placeholder="Phemibut, modafinil, ...",
+                                            placeholder="Phenibut, modafinil, ...",
                                         ),
                                         dbc.FormText(
                                             "Type the nootropic you're interested in in the box above. \n Only auto-suggested names are valid."

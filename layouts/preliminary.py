@@ -1,17 +1,27 @@
 import dash_core_components as dcc
 import dash_html_components as html
-from dash_html_components.Hr import Hr
-from networkx.algorithms.shortest_paths.generic import shortest_path
-import assets.texts as texts
 import dash_bootstrap_components as dbc
-from utils.preliminary_graphs import get_wiki_plots_figure, get_reddit_plots_figure
 from utils.utils import make_table_from_items
 from dash.dependencies import Input, Output
-from project.library_functions import get_name_by, get_top, get_top_posts
+from project.library_functions import (
+    get_name_by,
+    get_top,
+    get_top_posts,
+    get_wiki_plots_figure,
+    get_reddit_plots_figure,
+)
 from app import app
+from utils.data import (
+    all_names_and_synonyms,
+    synonym_mapping,
+    graph_reddit,
+    graph_wiki_directed,
+)
+from utils.preliminary import wiki_page, reddit_substance
 
 wiki_preliminary_plots = get_wiki_plots_figure()
 reddit_preliminary_plots = get_reddit_plots_figure()
+
 
 preliminary_layout = html.Div(
     [
@@ -19,30 +29,78 @@ preliminary_layout = html.Div(
         html.P(
             "Let's get a quick overview of our data, from both wikipedia and Reddit."
         ),
-        html.Hr(),
+        html.Hr(className="my-3"),
         html.H3("Wikipedia Pages"),
         html.P(
             "All our further analysis is based on the data we extracted from WikiPedia, so it's worth taking a deeper look at it."
         ),
         html.P(
-            "The data we took from WikiPedia consists of around 1.500 articles, corresponding roughly to pages under two main categories: dietary supplements, and psychoactive drugs."
+            "The data we took from WikiPedia consists of around 1.500 articles, \
+            corresponding roughly to pages under two main categories: dietary \
+                supplements, and psychoactive drugs. Let's look at the \
+                    distributions of some of the page's attributes."
         ),
-        dcc.Graph(figure=wiki_preliminary_plots, id="wiki_preliminary_plots"),
         dbc.Card(
             dbc.CardBody(
                 [
-                    html.H4("More Info", className="card-title"),
+                    html.H4("Some Histograms", className="card-title"),
+                    dcc.Graph(
+                        figure=wiki_preliminary_plots, id="wiki_preliminary_plots"
+                    ),
+                    html.H4("More Info:", className="card-title"),
                     html.H5(
-                        "(Hint: click one of the graphs above to learn more)",
-                        className="card-subtitle",
+                        "(Hint: click one of the bins above to learn more)",
+                        className="card-subtitle text-muted my-3",
                     ),
                     html.Div(
                         "", className="card-text", id="wiki_preliminary_plots_learnmore"
                     ),
                 ]
             ),
+            className="my-5",
         ),
-        html.Hr(),
+        html.P(
+            "To get a better feel for what the WikiPedia data looks like, you can look up the data for any substance you like below."
+        ),
+        dbc.Card(
+            dbc.CardBody(
+                [
+                    dbc.Container(
+                        [
+                            dbc.Row(
+                                dbc.Col(
+                                    children="",
+                                    id="wikipage_title",
+                                ),
+                            ),
+                            dbc.Row(
+                                [
+                                    dbc.Col(
+                                        dbc.Label("Choose which page to view:"), width=4
+                                    ),
+                                    dbc.Col(
+                                        dcc.Dropdown(
+                                            id="wikipage_select_dropdown",
+                                            options=[
+                                                {"label": i.title(), "value": i}
+                                                for i in all_names_and_synonyms
+                                            ],
+                                            value="caffeine",
+                                            placeholder="Pheibut, caffeine, modafinil, ...",
+                                        ),
+                                        width=3,
+                                    ),
+                                ],
+                                className="my-3",
+                            ),
+                            dbc.Row(id="wikipage_preview", children=[]),
+                        ]
+                    ),
+                ]
+            ),
+            className="my-5",
+        ),
+        html.Hr(className="my-5"),
         html.H3("Reddit Posts"),
         html.P(
             children=[
@@ -56,19 +114,22 @@ preliminary_layout = html.Div(
                 html.A(
                     href="https://github.com/pushshift/api", children="Pushshift API"
                 ),
-                """ let us download all submissions that were ever made on the subreddir - that is over 108.000 posts. 
+                """ let us download all submissions that were ever made on the subreddit - that is over 108.000 posts. 
                 Then, we used the names (and synonyms) found on wikipedia to detect mentions of nootropics in those posts. 
                 Let's look at some metrics.""",
             ]
         ),
-        dcc.Graph(figure=reddit_preliminary_plots, id="reddit_preliminary_plots"),
         dbc.Card(
             dbc.CardBody(
                 [
-                    html.H4("More Info", className="card-title"),
+                    html.H4("Some Histograms", className="card-title"),
+                    dcc.Graph(
+                        figure=reddit_preliminary_plots, id="reddit_preliminary_plots"
+                    ),
+                    html.H4("More Info:", className="card-title"),
                     html.H5(
-                        "(Hint: click one of the graphs above to learn more)",
-                        className="card-subtitle",
+                        "(Hint: click one of the bins above to learn more)",
+                        className="card-subtitle text-muted my-3",
                     ),
                     html.Div(
                         "",
@@ -77,6 +138,51 @@ preliminary_layout = html.Div(
                     ),
                 ]
             ),
+            className="mt-5",
+        ),
+        html.P(
+            "In order to analyze the posts we got from reddit, we had to find as many mentions of nootropics in those posts as possible.\
+                If you're interested in learning more about how we did, feel free to check our notebook - the link is on the homepage.\
+            This allowed us to get, for each substance, a list of all posts that metion it. Once more, you can look at the data for any substance you like below."
+        ),
+        dbc.Card(
+            dbc.CardBody(
+                [
+                    dbc.Container(
+                        [
+                            dbc.Row(
+                                dbc.Col(
+                                    children="",
+                                    id="reddit_substance_title",
+                                ),
+                            ),
+                            dbc.Row(
+                                [
+                                    dbc.Col(
+                                        dbc.Label("Choose substance to view data for:"),
+                                        width=4,
+                                    ),
+                                    dbc.Col(
+                                        dcc.Dropdown(
+                                            id="reddit_substance_select_dropdown",
+                                            options=[
+                                                {"label": i.title(), "value": i}
+                                                for i in all_names_and_synonyms
+                                            ],
+                                            value="caffeine",
+                                            placeholder="Phenibut, caffeine, modafinil, ...",
+                                        ),
+                                        width=3,
+                                    ),
+                                ],
+                                className="my-3",
+                            ),
+                            dbc.Row(id="reddit_substance_preview", children=[]),
+                        ]
+                    ),
+                ]
+            ),
+            className="my-5",
         ),
     ]
 )
@@ -147,7 +253,7 @@ def display_hover_data(clickdata):
 
     children.append(
         html.P(
-            f"Some pages in the selected bin include: {', '.join(selected_bucket_pages)}"
+            f"Some pages in the selected bin include: {', '.join([i.title() for i in selected_bucket_pages])}"
         )
     )
 
@@ -219,3 +325,26 @@ def display_hover_data(clickdata):
     )
 
     return children
+
+
+@app.callback(
+    [Output("wikipage_title", "children"), Output("wikipage_preview", "children")],
+    Input("wikipage_select_dropdown", "value"),
+)
+def show_wiki_page(value):
+    title, children = wiki_page(value)
+
+    return [title, children]
+
+
+@app.callback(
+    [
+        Output("reddit_substance_title", "children"),
+        Output("reddit_substance_preview", "children"),
+    ],
+    Input("reddit_substance_select_dropdown", "value"),
+)
+def show_reddit_substance(value):
+    title, children = reddit_substance(value)
+
+    return [title, children]

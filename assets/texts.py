@@ -1,8 +1,3 @@
-welcome_title = """
-Analyzing Nootropics usage pattenrns
-"""
-
-
 welcome_text = """
 
 Nootropics are substances that blablablabla

@@ -19,7 +19,11 @@ def make_table_from_items(items: List[Tuple], title: str):
 
     table = dbc.Table(
         children=[
-            html.Thead(title),
+            html.Thead(
+                html.Tr(
+                    html.Th(colSpan=2, children=title, style={"text-align": "center"})
+                )
+            ),
             html.Tbody(body),
         ],
         borderless=True,

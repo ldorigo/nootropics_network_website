@@ -41,6 +41,6 @@ available_themes = [
 external_stylesheets = [MATERIA]
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-
+app.config.suppress_callback_exceptions = True
 # Required for gunicorn
 server = app.server

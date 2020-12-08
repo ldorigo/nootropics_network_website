@@ -17,6 +17,7 @@ def assign_louvain_communities(
     wiki_graph: nx.Graph = None,
     reddit_edge_weight: str = "count",
     others_threshold: int = 2,
+    louvain_resolution_reddit: float = 1,
 ) -> Union[nx.Graph, Tuple[nx.Graph, nx.Graph]]:
     """ "Calculate communities using the louvain algorithm and assign them as property to the graphs node.
     if two graphs are given, also assign one graph's communities to the other's.
@@ -27,12 +28,12 @@ def assign_louvain_communities(
         wiki_graph (nx.Graph, optional): Wikipedia graph. Defaults to None.
         reddit_edge_weight (str, optional): edge attribute to use for weighting. Defaults to "count".
         others_threshold (int, optional): minimum size of the communities. Communities smaller than this are mapped to "other". Defaults to 2.
-
+        louvain_resolution_reddit (float, optional): granularity for the louvain algorithm on the reddit graph. Defaults to 1
     Returns:
         Union[nx.Graph, Tuple[nx.Graph, nx.Graph]]: [description]
     """
     reddit_dendrogram = community.generate_dendrogram(
-        reddit_graph, weight=reddit_edge_weight, resolution=0.7
+        reddit_graph, weight=reddit_edge_weight, resolution=louvain_resolution_reddit
     )
     if wiki_graph:
         wiki_dendrogram = community.generate_dendrogram(
@@ -52,7 +53,7 @@ def assign_louvain_communities(
             if counts[node_community] < others_threshold:
                 node_community = -1
             reddit_graph.nodes[node][
-                f"louvain_community_reddit_L{actual_level}"
+                f"louvain_community_reddit_R{louvain_resolution_reddit:.2f}_L{actual_level}"
             ] = f"L{actual_level}-{node_community:03}"
         if wiki_graph:
             # Also add the community from the other graph to allow comparing
@@ -107,11 +108,11 @@ def assign_louvain_communities(
                     if counts[node_community] < others_threshold:
                         node_community = -1
                     wiki_graph.nodes[node][
-                        f"louvain_community_reddit_L{actual_level}"
+                        f"louvain_community_reddit_R{louvain_resolution_reddit:.2f}_L{actual_level}"
                     ] = f"L{actual_level}-{node_community:03}"
                 except:
                     wiki_graph.nodes[node][
-                        f"louvain_community_reddit_L{level}"
+                        f"louvain_community_reddit_R{louvain_resolution_reddit:.2f}_L{level}"
                     ] = f"L{level}-NONE"
 
     return (
