@@ -17,7 +17,9 @@ nlp = spacy.load("en_core_web_sm")
 
 
 def get_lemmas(text, get_doc=False):
+    # utility function to get a list of lemmas from a text.
     doc = nlp.make_doc(text)
+    # only keep lemmas that are not punctuation
     lemmas = [i.lemma_.lower() for i in doc if not i.is_punct]
     if not get_doc:
         return lemmas
@@ -25,18 +27,21 @@ def get_lemmas(text, get_doc=False):
         return (lemmas, doc)
 
 
-#%%
 def assign_lemmas(graph: nx.Graph, save_spacy_docs=False):
+    # check that the graph was loaded with
     assert (
         "contents" in list(graph.nodes(data=True))[0][1]
         or "content" in list(graph.nodes(data=True))[0][1]
     ), "The graph does not contain node contents."
+    # iterate over all nodes:
     for node, data in tqdm(graph.nodes(data=True)):
+        # The data is kept in slightly different ways in the two networks,
+        # so we need the try/except statement:
         try:
             text = " ".join(data["contents"])
         except:
             text = data["content"]
-
+        # Get the lemmas and assign them to the node as a new attribute
         lemmas, doc = get_lemmas(text, get_doc=True)
         graph.nodes[node]["lemmas"] = lemmas
         if save_spacy_docs:
@@ -89,14 +94,22 @@ def assign_text_analysis(graph: nx.Graph):
     assign_tf_idfs(graph)
 
 
-def wordcloud_from_node(graph: nx.Graph, node: str, color_func):
-    wc = WordCloud(
-        background_color="white",
-        width=900,
-        height=900,
-        collocations=False,
-        color_func=color_func,
-    ).generate_from_frequencies(graph.nodes[node]["tf-idfs"])
+def wordcloud_from_node(graph: nx.Graph, node: str, color_func=None):
+    if color_func:
+        wc = WordCloud(
+            background_color="white",
+            width=900,
+            height=900,
+            collocations=False,
+            color_func=color_func,
+        ).generate_from_frequencies(graph.nodes[node]["tf-idfs"])
+    else:
+        wc = WordCloud(
+            background_color="white",
+            width=900,
+            height=900,
+            collocations=False,
+        ).generate_from_frequencies(graph.nodes[node]["tf-idfs"])
     return wc
 
 

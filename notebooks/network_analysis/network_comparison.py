@@ -35,50 +35,39 @@ g_reddit_negative = lf.create_graph_reddit(
     conditional_functions_dict=conditions_negative,
 )
 
+#%% Create alternative graphs.
+alt_reddit_graphs = dict()
 
-# %% Plot comparison of attribute distributions
-graphs = [
-    g_reddit,
-    g_reddit_max_10,
-    g_reddit_min_3_links,
-    g_reddit_post_length_limit,
-    # g_reddit_positive,
-    # g_reddit_negative
-]
+alt_reddit_graphs['Raw'] = lf.create_graph_reddit()
 
-graph_names = [
-    "Reddit Raw",
-    "Max 10 drugs in post",
-    "Min 3 occurrences for link",
-    "Only posts with 25+ characters"
-    # 'Reddit positive',
-    # 'Reddit negative'
-]
+alt_reddit_graphs['Max 10 drugs in post'] = \
+    lf.create_graph_reddit(max_drugs_in_post=10)
 
-axess = lf.plot_comparison_of_attribute_distributions(
-    graphs,
-    graph_names=graph_names,
+alt_reddit_graphs['Min 25 characters in post'] = \
+    lf.create_graph_reddit(min_content_length_in_characters=25)
+
+alt_reddit_graphs['Min 3 occurences to link'] = \
+    lf.create_graph_reddit(min_edge_occurrences_to_link=3)
+
+
+#%% Plot the distribution of the node parameter: "polarity_weighted"
+axess = w.graph.plot_comparison_of_attribute_distributions(
+    alt_reddit_graphs,
     attribute_name="polarity_weighted",
     attribute_parent="edge",
-    attribute_function=None,
-    attribute_function_name="",
     as_probability_distribution=False,
     bins=np.linspace(-1, 1, 201),
-    show=False,
+    x_limit=(-0.5, 0.5),
+    show=True
 )
 
-axess[0].set_xlim((-0.5, 0.5))
-plt.show()
-
 # %% Plot distribution of values of one instance (node or edge)
-graphs = [g_reddit, g_reddit_max_10, g_reddit_min_3_links, g_reddit_post_length_limit]
-
-graph_names = [
-    "Reddit Raw",
-    "Max 10 drugs in post",
-    "Min 3 occurrences for link",
-    "Only posts with 25+ characters",
-]
+graphs = {
+    "Reddit Raw": g_reddit,
+    "Max 10 drugs in post": g_reddit_max_10,
+    "Min 3 occurrences for link": g_reddit_min_3_links,
+    "Only posts with 25+ characters": g_reddit_post_length_limit
+}
 
 instance = "node"
 instance_label = "caffeine"
@@ -89,7 +78,6 @@ w.graph.plot_distribution_of_attribute_of_1_instance(
     instance=instance,
     instance_label=instance_label,
     attribute_name=attribute_name,
-    graph_names=graph_names,
 )
 
 # %% Plot degree distribution summary

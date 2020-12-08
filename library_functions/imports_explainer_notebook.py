@@ -1,8 +1,10 @@
 # %%
 import numpy as np
 import pandas as pd
+import networkx as nx
 import warnings
 import wojciech as w
+from tqdm.auto import tqdm
 
 from IPython.core.interactiveshell import InteractiveShell
 from IPython.display import Markdown, display
@@ -18,7 +20,7 @@ try:
 except ModuleNotFoundError:
     from project.library_functions.config import Config
 
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 
 
 def printmd(string):

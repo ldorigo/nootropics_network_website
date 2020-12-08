@@ -21,10 +21,9 @@ def create_graph_reddit(
     include_node_contents: bool = False,
     include_link_contents: bool = False,
     alternative_path: Union[str, Path] = None,
-    show_progress_bars: bool = False
+    show_progress_bars: bool = False,
 ):
     """
-
     Args:
         max_drugs_in_post (int): a limit of the number of drugs in a post.
                                  Posts containing more drugs will be
@@ -92,11 +91,13 @@ def create_graph_reddit(
             g_reddit.nodes[drug]["polarity"] = []
             g_reddit.nodes[drug]["subjectivity"] = []
             g_reddit.nodes[drug]["contents"] = []
+            g_reddit.nodes[drug]["ids"] = []
             g_reddit.nodes[drug]["categories"] = wiki_data["categories"][index_drug]
 
     # Link drugs that appear in the same post
-    for reddit_post in tqdm(list(drug_database_reddit.values()),
-                            disable=not show_progress_bars):
+    for post_id, reddit_post in tqdm(
+        list(drug_database_reddit.items()), disable=not show_progress_bars
+    ):
 
         # Disregard the post if the length of its content does not
         # surpass the threshold
@@ -105,15 +106,16 @@ def create_graph_reddit(
 
         # Link the drugs and assign link attributes
         link_drugs(
-            g_reddit,
-            reddit_post["matches"],
-            reddit_post["polarity"],
-            reddit_post["subjectivity"],
-            reddit_post["title"] + " " + reddit_post["content"],
-            max_drugs_in_post,
-            conditional_functions_dict,
+            G=g_reddit,
+            list_of_drugs=reddit_post["matches"],
+            polarity=reddit_post["polarity"],
+            subjectivity=reddit_post["subjectivity"],
+            text=reddit_post["title"] + " " + reddit_post["content"],
+            max_drugs_in_post=max_drugs_in_post,
+            conditional_functions_dict=conditional_functions_dict,
             include_link_contents=include_link_contents,
             include_node_contents=include_node_contents,
+            post_id=post_id,
         )
 
     # Remove the edges that occur fewer times than the threshold
@@ -143,6 +145,7 @@ def link_drugs(
     list_of_drugs: List[str],
     polarity: float,
     subjectivity: float,
+    post_id: str,
     text: str,
     max_drugs_in_post: int,
     conditional_functions_dict,
@@ -151,7 +154,7 @@ def link_drugs(
 ):
 
     # Discard posts where the number of mentioned substances exceeds the limit
-    if (len(list_of_drugs) <= 1) or (len(list_of_drugs) > max_drugs_in_post):
+    if (len(list_of_drugs) < 1) or (len(list_of_drugs) > max_drugs_in_post):
         return
 
     # Discard posts that do NOT meet the polarity criteria
@@ -171,8 +174,13 @@ def link_drugs(
             G.nodes[drug]["count"] += 1
             G.nodes[drug]["polarity"].append(polarity)
             G.nodes[drug]["subjectivity"].append(subjectivity)
+            G.nodes[drug]["ids"].append(post_id)
             if include_node_contents:
                 G.nodes[drug]["contents"].append(text)
+
+    # Stop here if there is only one drug
+    if len(list_of_drugs) == 1:
+        return
 
     # Assign the edge attributes.
     for index in range(len(list_of_drugs)):
